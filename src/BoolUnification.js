@@ -1,20 +1,23 @@
 import {
-    TRUE,
     FALSE,
     freeVars,
-    isFalse,
-    isTrue,
-    isNot,
     isAnd,
+    isFalse,
+    isNot,
     isOr,
+    isTrue,
+    isVar,
     mkAnd,
     mkNot,
     mkOr,
-    isVar,
     mkVar,
-    show
+    show,
+    TRUE
 } from "./Bools.js";
 
+/**
+ * Returns a substitution that unifies p and q (if it exists).
+ */
 export function unify(p, q) {
     // The boolean expression we want to show is 0.
     let query = mkOr(mkAnd(p, mkNot(q)), mkAnd(mkNot(p), q))
@@ -30,6 +33,9 @@ export function unify(p, q) {
     }
 }
 
+/**
+ * Returns a substitution that falsifies `f` (or reports that no such substitution exists).
+ */
 function successiveVariableElimination(f, fvs) {
     if (fvs.length === 0) {
         if (!satisfiable(f)) {
