@@ -91,7 +91,13 @@ class App extends Component {
     }
 
     toggleMinimize() {
-        this.setState({minimize: !this.state.minimize})
+        if (this.state.minimize) {
+            this.setState({minimize: false})
+            this.setState({minimizeSubFormulas: false})
+        } else {
+            this.setState({minimize: true})
+            this.setState({minimizeSubFormulas: true})
+        }
     }
 
     toggleMinimizeSubFormulas() {
@@ -132,7 +138,7 @@ class App extends Component {
                                 </Col>
                             </Row>
 
-                            <Row form className="float-right">
+                            <Row form>
                                 <CustomInput id="reformat" type="checkbox"
                                              label="Reformat as you type"
                                              checked={this.state.formatInput}
@@ -154,7 +160,7 @@ class App extends Component {
                                 />
 
                                 <CustomInput id="minimizeSubFormulas" type="checkbox"
-                                             label="Recursive Minimization"
+                                             label="Recursively minimize"
                                              checked={this.state.minimizeSubFormulas}
                                              onChange={this.toggleMinimizeSubFormulas.bind(this)}
                                              inline
