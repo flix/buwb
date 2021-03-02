@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import './App.css';
 import {isTrue, isFalse, isVar, isNot, isAnd, isOr, minimize, precedence} from "./Bools";
 import {parse} from "./Parser";
-import {unify} from "./Unification";
+import {unify} from "./BoolUnification";
 
 import {
     Alert,

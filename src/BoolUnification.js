@@ -26,7 +26,6 @@ export function unify(p, q) {
         let subst = successiveVariableElimination(query, fvs)
         return {status: "success", subst: subst}
     } catch (e) {
-        console.log(e)
         return {status: "failure", reason: e.toString()}
     }
 }

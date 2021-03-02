@@ -1,7 +1,7 @@
 /**
  * The TRUE constant.
  */
-import {applySubst} from "./Unification.js";
+import {applySubst} from "./BoolUnification.js";
 import {Cache} from "./Cache.js";
 
 export let TRUE = {type: 'TRUE'}
