@@ -78,6 +78,7 @@ class App extends Component {
 
         return x
             .replaceAll("not", "¬")
+            .replaceAll("neg", "¬")
             .replaceAll("and", "∧")
             .replaceAll("or", "∨")
     }
