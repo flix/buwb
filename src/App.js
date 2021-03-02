@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {show, isTrue, isFalse, isVar, isNot, isAnd, isOr, truthtable, minimize, cnf, dnf, precedence} from "./Bools";
+import {isTrue, isFalse, isVar, isNot, isAnd, isOr, minimize, precedence} from "./Bools";
 import {parse} from "./Parser";
 import {unify} from "./Unification";
 
@@ -9,15 +9,12 @@ import {
     Card,
     CardHeader,
     CardBody,
-    CardTitle,
     CustomInput,
     Col,
     Container,
     Form,
     FormGroup,
     FormFeedback,
-    FormText,
-    Label,
     Input,
     Row,
     Table
