@@ -186,7 +186,7 @@ class App extends Component {
     renderLHSInput() {
         if (this.state.lhsInput === "" || this.state.lhsParsed.valid) {
             return <FormGroup>
-                <Input id="lhs" type="text" bsSize="lg" autoComplete="off"
+                <Input id="lhs" type="text" bsSize="lg" autoFocus autoComplete="off"
                        value={this.state.lhsInput}
                        onChange={this.notifyLHS.bind(this)}
                 />
