@@ -1,0 +1,15 @@
+td {
+    font-family: 'Inconsolata', monospace;
+    font-size: 1.3rem;
+}
+
+.qeq {
+    font-size: 4rem;
+    font-weight: bold;
+    line-height: 2.2rem;
+    text-align: center;
+}
+
+.lparen, .rparen {
+    color: #aaa;
+}
