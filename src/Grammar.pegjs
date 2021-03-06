@@ -4,10 +4,10 @@
 
 Term
   = name: Constructor _ "(" _ terms:TermList _ ")"  {
-      return { "type": "TERM", "name": name, "ts": terms };
+      return { "type": "CONST", "name": name, "ts": terms };
     }
   / name: Constructor {
-      return { "type": "TERM", "name": name, "ts": [] };
+      return { "type": "CONST", "name": name, "ts": [] };
     }
   / Conjunction
 

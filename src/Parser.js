@@ -146,10 +146,10 @@ function peg$parse(input, options) {
       peg$c2 = ")",
       peg$c3 = peg$literalExpectation(")", false),
       peg$c4 = function(name, terms) {
-            return { "type": "TERM", "name": name, "ts": terms };
+            return { "type": "CONST", "name": name, "ts": terms };
           },
       peg$c5 = function(name) {
-            return { "type": "TERM", "name": name, "ts": [] };
+            return { "type": "CONST", "name": name, "ts": [] };
           },
       peg$c6 = ",",
       peg$c7 = peg$literalExpectation(",", false),

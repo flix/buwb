@@ -19,7 +19,7 @@ import {
     Row,
     Table
 } from "reactstrap";
-import {isTerm} from "./Terms";
+import {isConstructor} from "./Terms";
 
 class App extends Component {
 
@@ -68,15 +68,8 @@ class App extends Component {
     }
 
     solve(x, y) {
-        try {
-            console.log("lhs = ", x)
-            console.log("rhs = ", y)
-            let result = unifyTerms(x, y)
-            console.log("result = ", result)
-            this.setState({result: result})
-        } catch (e) {
-            console.log(e)
-        }
+        let result = unifyTerms(x, y)
+        this.setState({result: result})
     }
 
     format(x) {
@@ -241,21 +234,14 @@ class App extends Component {
             } else if (result.status === "failure") {
                 return <Alert color="danger" className="mt-3">
                     <h4 className="alert-heading">Unification Failure</h4>
-                    <p>
-                        The two terms cannot be unified.
-                    </p>
                     <hr/>
                     <p className="mb-0">
-                        <code>
                             {result.reason}
-                        </code>
                     </p>
                 </Alert>
             } else {
                 throw new Error(`Illegal value of status: ${result.status}`)
             }
-        } else {
-            return <h5>Enter Something</h5>
         }
     }
 
@@ -295,7 +281,7 @@ class App extends Component {
         let parenthesize = this.state.parenthesize
 
         function visit(x) {
-            if (isTerm(x)) {
+            if (isConstructor(x)) {
                 return x.name;
             } else if (isVar(x)) {
                 return x.name;

@@ -1,4 +1,5 @@
 import {FALSE, isAnd, isFalse, isNot, isOr, isTrue, isVar, mkAnd, mkNot, mkOr, mkVar, TRUE} from "./Bools";
+import {isConstructor, mkConstructor} from "./Terms";
 
 /**
  * Applies the given substitution `subst` to `f`.
@@ -11,7 +12,9 @@ export function applySubst(subst, f) {
         throw new Error(`Illegal argument f: ${f}.`)
     }
 
-    if (isTrue(f)) {
+    if (isConstructor(f)) {
+        return mkConstructor(f.name, f.ts.map(t => applySubst(subst, t)))
+    } else if (isTrue(f)) {
         return TRUE
     } else if (isFalse(f)) {
         return FALSE
@@ -44,11 +47,10 @@ export function mergeSubsts(s1, s2) {
     }
 
     for (let key of keys1) {
-        if (!s2.contains(key)) {
-            result[key] = s2[key]
+        if (s2[key] === undefined) {
+            result[key] = s1[key]
         }
     }
 
-    console.log("merge result = ", result)
     return result
 }

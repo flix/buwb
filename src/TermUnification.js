@@ -1,5 +1,5 @@
 import {isBool, minBool} from "./Bools";
-import {isTerm, mkTerm} from "./Terms";
+import {isConstructor, mkConstructor} from "./Terms";
 import {boolUnify} from "./BoolUnification";
 import {applySubst, mergeSubsts} from "./Substitution";
 
@@ -9,14 +9,14 @@ import {applySubst, mergeSubsts} from "./Substitution";
 export function unifyTerms(x, y) {
     if (isBool(x) && isBool(y)) {
         return boolUnify(x, y)
-    } else if (isTerm(x) && isTerm(y)) {
+    } else if (isConstructor(x) && isConstructor(y)) {
         if (x.name === y.name) {
             return unifyTermLists(x.ts, y.ts)
         } else {
-            return {status: "failure", reason: `Mismatched constructors: ${x.name} and ${y.name}.`}
+            return {status: "failure", reason: `Mismatched constructor names: ${x.name} and ${y.name}.`}
         }
     } else {
-        return {status: "failure", reason: `Mismatched kinds: ${x} and ${y}.`}
+        return {status: "failure", reason: `Mismatched kinds: ${JSON.stringify(x)} and ${JSON.stringify(y)}.`}
     }
 }
 
@@ -81,8 +81,8 @@ export function minTerm(x, recursively) {
     }
     if (isBool(x)) {
         return minBool(x, recursively)
-    } else if (isTerm(x)) {
-        return mkTerm(x.name, x.ts.map(t => minTerm(t, recursively)))
+    } else if (isConstructor(x)) {
+        return mkConstructor(x.name, x.ts.map(t => minTerm(t, recursively)))
     } else {
         throw new Error(`Illegal argument x: ${x}.`)
     }

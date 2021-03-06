@@ -16,8 +16,6 @@ import {applySubst} from "./Substitution";
  * Returns a substitution that unifies p and q (if it exists).
  */
 export function boolUnify(p, q) {
-    console.log("boolUnify(p, q) = ", p, q)
-
     // The boolean expression we want to show is 0.
     let query = mkOr(mkAnd(p, mkNot(q)), mkAnd(mkNot(p), q))
 
@@ -85,7 +83,6 @@ function satisfiable(q) {
     } else if (isFalse(q)) {
         return false
     } else {
-        console.log("Formula", show(q))
         throw Error(`Unexpected formula ${q}.`)
     }
 }
