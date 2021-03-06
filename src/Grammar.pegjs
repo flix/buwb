@@ -1,6 +1,7 @@
 // https://pegjs.org/online
 // compile with:
 // $ pegjs -o Parser.js Grammar.pegjs
+// then change last line to: export let parse = peg$parse
 
 Term
   = name: Constructor _ "(" _ terms:TermList _ ")"  {
