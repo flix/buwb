@@ -124,6 +124,13 @@ class App extends Component {
                     including Boolean rings.
                 </blockquote>
 
+                <blockquote>
+                    <b>The Problem: </b> Given two Boolean formulas x and y, the Boolean Unification Problem x ?= y is
+                    to compute a unifier (solution) i.e. a substitution S such that S(x) ≡ S(y) or to report that no
+                    such substitution
+                    exists.
+                </blockquote>
+
                 <Card>
                     <CardHeader>Enter two Boolean formulae to compute their most-general unifier (mgu)</CardHeader>
                     <CardBody>
@@ -236,7 +243,7 @@ class App extends Component {
                     <h4 className="alert-heading">Unification Failure</h4>
                     <hr/>
                     <p className="mb-0">
-                            {result.reason}
+                        {result.reason}
                     </p>
                 </Alert>
             } else {
