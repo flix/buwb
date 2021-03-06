@@ -18,7 +18,7 @@ import {
 /**
  * Returns a substitution that unifies p and q (if it exists).
  */
-export function unify(p, q) {
+export function boolUnify(p, q) {
     // The boolean expression we want to show is 0.
     let query = mkOr(mkAnd(p, mkNot(q)), mkAnd(mkNot(p), q))
 

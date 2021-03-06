@@ -54,6 +54,13 @@ export function isOr(f) {
 }
 
 /**
+ * Returns `true` if the given `x` is a Boolean formula.
+ */
+export function isBool(x) {
+    return isTrue(x) || isFalse(x) || isVar(x) || isAnd(x) || isOr(x)
+}
+
+/**
  * Returns the variable formula with name `x`.
  */
 export function mkVar(x) {

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import './App.css';
 import {isTrue, isFalse, isVar, isNot, isAnd, isOr, minimize, precedence} from "./Bools";
 import {parse} from "./Parser";
-import {unify} from "./BoolUnification";
+import {unifyTerms} from "./TermUnification";
 
 import {
     Alert,
@@ -69,7 +69,7 @@ class App extends Component {
     solve(x, y) {
         console.log("x = ", x)
         console.log("y = ", y)
-        let result = unify(x, y)
+        let result = unifyTerms(x, y)
         this.setState({result: result})
     }
 
