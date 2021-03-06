@@ -1,7 +1,7 @@
 import {isBool, minBool} from "./Bools";
 import {isConstructor, mkConstructor} from "./Terms";
 import {boolUnify} from "./BoolUnification";
-import {applySubst, mergeSubsts} from "./Substitution";
+import {applySubst, mergeSubst} from "./Substitution";
 
 /**
  * Returns a substitution that unifies p and q (if it exists).
@@ -64,7 +64,7 @@ function unifyTermLists(l1, l2) {
                 return result1;
             } else {
                 // Success. Compose substitutions.
-                let subst1 = mergeSubsts(result1.subst, subst)
+                let subst1 = mergeSubst(result1.subst, subst)
                 return {"status": "success", subst: subst1}
             }
         }

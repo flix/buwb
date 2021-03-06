@@ -95,7 +95,7 @@ export function mkNot(x) {
 }
 
 /**
- * Returns the conjunction of the two formulae `x` and `y`.
+ * Returns the conjunction of the two formulas `x` and `y`.
  */
 export function mkAnd(x, y) {
     if (x.type === undefined) throw Error(`Illegal argument: ${x}.`)
@@ -117,7 +117,7 @@ export function mkAnd(x, y) {
 }
 
 /**
- * Returns the disjunction of the two formulae `x` and `y`.
+ * Returns the disjunction of the two formulas `x` and `y`.
  */
 export function mkOr(x, y) {
     if (x.type === undefined) throw Error(`Illegal argument: ${x}.`)

@@ -46,8 +46,8 @@ function genTable(n, maxDepth) {
     }
     //console.log(`Variables = ${freeVars}`)
 
-    let formulae = generate(maxDepth, freeVars)
-    let table = buildLookupTable(formulae, freeVars)
+    let formulas = generate(maxDepth, freeVars)
+    let table = buildLookupTable(formulas, freeVars)
     //console.log("Lookup Table Size  = ", Object.keys(table).length)
 
     return table

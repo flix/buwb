@@ -2,53 +2,60 @@ import {FALSE, isAnd, isFalse, isNot, isOr, isTrue, isVar, mkAnd, mkNot, mkOr, m
 import {isConstructor, mkConstructor} from "./Terms";
 
 /**
- * Applies the given substitution `subst` to `f`.
+ * Applies the given substitution `subst` to the given `term`.
  */
-export function applySubst(subst, f) {
-    if (subst === undefined) {
-        throw new Error(`Illegal argument subst: ${subst}.`)
+export function applySubst(subst, term) {
+    if (typeof subst !== "object") {
+        throw new Error(`Illegal argument 'subst': ${subst}.`)
     }
-    if (f === undefined) {
-        throw new Error(`Illegal argument f: ${f}.`)
+    if (term === undefined) {
+        throw new Error(`Illegal argument 'term': ${term}.`)
     }
 
-    if (isConstructor(f)) {
-        return mkConstructor(f.name, f.ts.map(t => applySubst(subst, t)))
-    } else if (isTrue(f)) {
+    if (isConstructor(term)) {
+        return mkConstructor(term.name, term.ts.map(t => applySubst(subst, t)))
+    } else if (isTrue(term)) {
         return TRUE
-    } else if (isFalse(f)) {
+    } else if (isFalse(term)) {
         return FALSE
-    } else if (isVar(f)) {
-        if (subst[f.name] !== undefined)
-            return subst[f.name]
+    } else if (isVar(term)) {
+        if (subst[term.name] !== undefined)
+            return subst[term.name]
         else
-            return mkVar(f.name)
-    } else if (isNot(f)) {
-        return mkNot(applySubst(subst, f.f))
-    } else if (isAnd(f)) {
-        return mkAnd(applySubst(subst, f.f1), applySubst(subst, f.f2))
-    } else if (isOr(f)) {
-        return mkOr(applySubst(subst, f.f1), applySubst(subst, f.f2))
+            return mkVar(term.name)
+    } else if (isNot(term)) {
+        return mkNot(applySubst(subst, term.f))
+    } else if (isAnd(term)) {
+        return mkAnd(applySubst(subst, term.f1), applySubst(subst, term.f2))
+    } else if (isOr(term)) {
+        return mkOr(applySubst(subst, term.f1), applySubst(subst, term.f2))
     } else {
-        throw Error(`Unexpected argument: ${f}.`)
+        throw Error(`Unexpected argument 'term': ${term}.`)
     }
 }
 
 /**
- * Returns the composition of `s1` with `s2`.
+ * Returns the composition of the two substitutions `subst1` with `subst2`.
  */
-export function mergeSubsts(s1, s2) {
-    let keys1 = Object.keys(s1);
-    let keys2 = Object.keys(s2);
+export function mergeSubst(subst1, subst2) {
+    if (typeof subst1 !== "object") {
+        throw new Error(`Illegal argument 'subst1': ${subst1}.`)
+    }
+    if (typeof subst2 !== "object") {
+        throw new Error(`Illegal argument 'subst2': ${subst2}.`)
+    }
+
+    let keys1 = Object.keys(subst1);
+    let keys2 = Object.keys(subst2);
 
     let result = {}
     for (let key of keys2) {
-        result[key] = applySubst(s1, s2[key])
+        result[key] = applySubst(subst1, subst2[key])
     }
 
     for (let key of keys1) {
-        if (s2[key] === undefined) {
-            result[key] = s1[key]
+        if (subst2[key] === undefined) {
+            result[key] = subst1[key]
         }
     }
 

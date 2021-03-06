@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {isTrue, isFalse, isVar, isNot, isAnd, isOr, minBool, precedence} from "./Bools";
+import {isTrue, isFalse, isVar, isNot, isAnd, isOr, precedence} from "./Bools";
 import {parse} from "./Parser";
 import {minTerm, unifyTerms} from "./TermUnification";
 
@@ -132,7 +132,7 @@ class App extends Component {
                 </blockquote>
 
                 <Card>
-                    <CardHeader>Enter two Boolean formulae to compute their most-general unifier (mgu)</CardHeader>
+                    <CardHeader>Enter two Boolean formulas to compute their most-general unifier (mgu)</CardHeader>
                     <CardBody>
                         <Form>
                             <Row form>
