@@ -16,6 +16,8 @@ import {applySubst} from "./Substitution";
  * Returns a substitution that unifies p and q (if it exists).
  */
 export function boolUnify(p, q) {
+    console.log("boolUnify(p, q) = ", p, q)
+
     // The boolean expression we want to show is 0.
     let query = mkOr(mkAnd(p, mkNot(q)), mkAnd(mkNot(p), q))
 
@@ -26,7 +28,11 @@ export function boolUnify(p, q) {
         let subst = successiveVariableElimination(query, fvs)
         return {status: "success", subst: subst}
     } catch (e) {
-        return {status: "failure", reason: e.toString()}
+        if (e instanceof SVEError) {
+            return {status: "failure", reason: `Cannot unify: ${show(p)} and ${show(q)}`}
+        } else {
+            throw e
+        }
     }
 }
 
@@ -38,7 +44,7 @@ function successiveVariableElimination(f, fvs) {
         if (!satisfiable(f)) {
             return {}
         } else {
-            throw Error("Unification Error")
+            throw new SVEError()
         }
     } else {
         let [x, ...xs] = fvs;
@@ -47,6 +53,16 @@ function successiveVariableElimination(f, fvs) {
         let se = successiveVariableElimination(mkAnd(t0, t1), xs)
         let st = {[x]: mkOr(applySubst(se, t0), mkAnd(mkVar(x), mkNot(applySubst(se, t1))))}
         return mergeSubst(st, se)
+    }
+}
+
+/**
+ * A custom exception used in the successive variable elimination algorithm.
+ */
+class SVEError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "Boolean Unification Failure";
     }
 }
 

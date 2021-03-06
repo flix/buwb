@@ -57,7 +57,7 @@ export function isOr(f) {
  * Returns `true` if the given `x` is a Boolean formula.
  */
 export function isBool(x) {
-    return isTrue(x) || isFalse(x) || isVar(x) || isAnd(x) || isOr(x)
+    return isTrue(x) || isFalse(x) || isNot(x) || isVar(x) || isAnd(x) || isOr(x)
 }
 
 /**
@@ -341,9 +341,9 @@ export function truthRow(f, fvs) {
 /**
  * Optionally returns a minified version of formula `x`.
  */
-export function minimize(x, recursively) {
+export function minBool(x, recursively) {
     if (recursively === true) {
-        return minimizeRecursively(x)
+        return minBoolRecursively(x)
     } else if (recursively === false) {
         return lookup(x)
     } else {
@@ -354,7 +354,7 @@ export function minimize(x, recursively) {
 /**
  * Recursively minimizes the formula `x`.
  */
-function minimizeRecursively(x) {
+function minBoolRecursively(x) {
     if (isTrue(x)) {
         return x
     } else if (isFalse(x)) {
@@ -362,11 +362,11 @@ function minimizeRecursively(x) {
     } else if (isVar(x)) {
         return x
     } else if (isNot(x)) {
-        return lookup(mkNot(minimizeRecursively(x.f)))
+        return lookup(mkNot(minBoolRecursively(x.f)))
     } else if (isAnd(x)) {
-        return lookup(mkAnd(minimizeRecursively(x.f1), minimizeRecursively(x.f2)))
+        return lookup(mkAnd(minBoolRecursively(x.f1), minBoolRecursively(x.f2)))
     } else if (isOr(x)) {
-        return lookup(mkOr(minimizeRecursively(x.f1), minimizeRecursively(x.f2)))
+        return lookup(mkOr(minBoolRecursively(x.f1), minBoolRecursively(x.f2)))
     } else {
         throw Error(`Unexpected argument: ${x}.`)
     }

@@ -4,6 +4,13 @@ import {FALSE, isAnd, isFalse, isNot, isOr, isTrue, isVar, mkAnd, mkNot, mkOr, m
  * Applies the given substitution `subst` to `f`.
  */
 export function applySubst(subst, f) {
+    if (subst === undefined) {
+        throw new Error(`Illegal argument subst: ${subst}.`)
+    }
+    if (f === undefined) {
+        throw new Error(`Illegal argument f: ${f}.`)
+    }
+
     if (isTrue(f)) {
         return TRUE
     } else if (isFalse(f)) {
@@ -22,4 +29,26 @@ export function applySubst(subst, f) {
     } else {
         throw Error(`Unexpected argument: ${f}.`)
     }
+}
+
+/**
+ * Returns the composition of `s1` with `s2`.
+ */
+export function mergeSubsts(s1, s2) {
+    let keys1 = Object.keys(s1);
+    let keys2 = Object.keys(s2);
+
+    let result = {}
+    for (let key of keys2) {
+        result[key] = applySubst(s1, s2[key])
+    }
+
+    for (let key of keys1) {
+        if (!s2.contains(key)) {
+            result[key] = s2[key]
+        }
+    }
+
+    console.log("merge result = ", result)
+    return result
 }

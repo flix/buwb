@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import './App.css';
-import {isTrue, isFalse, isVar, isNot, isAnd, isOr, minimize, precedence} from "./Bools";
+import {isTrue, isFalse, isVar, isNot, isAnd, isOr, minBool, precedence} from "./Bools";
 import {parse} from "./Parser";
-import {unifyTerms} from "./TermUnification";
+import {minTerm, unifyTerms} from "./TermUnification";
 
 import {
     Alert,
@@ -19,6 +19,7 @@ import {
     Row,
     Table
 } from "reactstrap";
+import {isTerm} from "./Terms";
 
 class App extends Component {
 
@@ -29,7 +30,7 @@ class App extends Component {
             rhsInput: "",
             lhsParsed: {valid: undefined},
             rhsParsed: {valid: undefined},
-            result: "Pending",
+            result: undefined,
             formatInput: true,
             logicSymbols: true,
             minimize: true,
@@ -67,10 +68,15 @@ class App extends Component {
     }
 
     solve(x, y) {
-        console.log("x = ", x)
-        console.log("y = ", y)
-        let result = unifyTerms(x, y)
-        this.setState({result: result})
+        try {
+            console.log("lhs = ", x)
+            console.log("rhs = ", y)
+            let result = unifyTerms(x, y)
+            console.log("result = ", result)
+            this.setState({result: result})
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     format(x) {
@@ -224,27 +230,32 @@ class App extends Component {
 
     renderResult() {
         let result = this.state.result;
-        if (result && result.status === "success") {
-            return (<Card className="mt-3">
-                <CardHeader>Substitution</CardHeader>
-                <CardBody>
-                    {this.renderSubstitution(Object.entries(result.subst))}
-                </CardBody>
-            </Card>)
-        }
-        if (result && result.status === "failure") {
-            return <Alert color="danger" className="mt-3">
-                <h4 className="alert-heading">Unification Failure</h4>
-                <p>
-                    The two terms cannot be unified.
-                </p>
-                <hr/>
-                <p className="mb-0">
-                    <code>
-                        {result.reason}
-                    </code>
-                </p>
-            </Alert>
+        if (result !== undefined) {
+            if (result.status === "success") {
+                return (<Card className="mt-3">
+                    <CardHeader>Substitution</CardHeader>
+                    <CardBody>
+                        {this.renderSubstitution(Object.entries(result.subst))}
+                    </CardBody>
+                </Card>)
+            } else if (result.status === "failure") {
+                return <Alert color="danger" className="mt-3">
+                    <h4 className="alert-heading">Unification Failure</h4>
+                    <p>
+                        The two terms cannot be unified.
+                    </p>
+                    <hr/>
+                    <p className="mb-0">
+                        <code>
+                            {result.reason}
+                        </code>
+                    </p>
+                </Alert>
+            } else {
+                throw new Error(`Illegal value of status: ${result.status}`)
+            }
+        } else {
+            return <h5>Enter Something</h5>
         }
     }
 
@@ -269,7 +280,7 @@ class App extends Component {
 
     renderFormula(x) {
         if (this.state.minimize) {
-            return this.renderTerm(minimize(x, this.state.minimizeSubFormulas))
+            return this.renderTerm(minTerm(x, this.state.minimizeSubFormulas))
         } else {
             return this.renderTerm(x)
         }
@@ -284,12 +295,15 @@ class App extends Component {
         let parenthesize = this.state.parenthesize
 
         function visit(x) {
-            if (isTrue(x)) {
+            if (isTerm(x)) {
+                return x.name;
+            } else if (isVar(x)) {
+                return x.name;
+            } else if (isTrue(x)) {
                 return "true"
             } else if (isFalse(x)) {
                 return "false"
-            } else if (isVar(x)) {
-                return x.name;
+
             } else if (isNot(x)) {
                 let withParens = precedence(x.f.type) >= precedence("NOT");
                 if (withParens || parenthesize) {
