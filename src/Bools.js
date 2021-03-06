@@ -1,4 +1,4 @@
-import {applySubst} from "./BoolUnification.js";
+import {applySubst} from "./Substitution.js";
 import {Cache} from "./Cache.js";
 
 /**

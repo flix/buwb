@@ -6,11 +6,18 @@ Term
   = name: Constructor _ "(" _ terms:TermList _ ")"  {
       return { "type": "TERM", "name": name, "ts": terms };
     }
+  / name: Constructor {
+      return { "type": "TERM", "name": name, "ts": [] };
+    }
   / Conjunction
 
 TermList
-    = Term _ "," _ TermList
-    / Term
+    = head:Term _ "," _ rest:TermList {
+        return [head, ...rest]
+      }
+    / last: Term {
+        return [last]
+    }
 
 Conjunction
   = head:Disjunction tail:(_ ("||" / "or" / "∨") _ Disjunction)* {

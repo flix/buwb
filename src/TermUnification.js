@@ -6,6 +6,8 @@ import {boolUnify} from "./BoolUnification";
  * Returns a substitution that unifies p and q (if it exists).
  */
 export function unifyTerms(x, y) {
+    // TODO: Variable case.
+
     if (isBool(x) && isBool(y)) {
         return boolUnify(x, y)
     } else if (isTerm(x) && isTerm(y)) {
