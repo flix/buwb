@@ -67,6 +67,8 @@ class App extends Component {
     }
 
     solve(x, y) {
+        console.log("x = ", x)
+        console.log("y = ", y)
         let result = unify(x, y)
         this.setState({result: result})
     }

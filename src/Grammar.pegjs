@@ -2,13 +2,22 @@
 // compile with:
 // $ pegjs -o Parser.js Grammar.pegjs
 
+Term
+  = name: Constructor _ "(" _ terms:TermList _ ")"  {
+      return { "type": "TERM", "name": name, "ts": terms };
+    }
+  / Conjunction
+
+TermList
+    = Term _ "," _ TermList
+    / Term
+
 Conjunction
   = head:Disjunction tail:(_ ("||" / "or" / "∨") _ Disjunction)* {
       return tail.reduce(function(result, element) {
         if (element[1] === "||") { return {type: 'OR', f1: result, f2: element[3]}; }
         if (element[1] === "or") { return {type: 'OR', f1: result, f2: element[3]}; }
         if (element[1] === "∨")  { return {type: 'OR', f1: result, f2: element[3]}; }
-
       }, head);
     }
 
@@ -26,12 +35,15 @@ Factor
   / "not" _  expr:Factor         { return {type: 'NOT', f: expr}; }
   / "neg" _  expr:Factor         { return {type: 'NOT', f: expr}; }
   / "¬"   _  expr:Factor         { return {type: 'NOT', f: expr}; }
-  / LitOrVar
+  / Atom
 
-LitOrVar "literal or variable"
+Atom "literal or variable"
   = _ "true"                { return {type: 'TRUE'}; }
   / _ "false"               { return {type: 'FALSE'}; }
-  / _ [a-z][a-z0-9]*        { return {type: 'VAR', name: text()};  }
+  / _ [a-z][a-z0-9]*        { return {type: 'VAR', name: text()}; }
+
+Constructor "term constructor"
+  = _ [A-Z][a-z0-9]*        { return text(); }
 
 _ "whitespace"
   = [ \t\n\r]*

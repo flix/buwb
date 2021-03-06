@@ -8,13 +8,13 @@ export function isTerm(x) {
 /**
  * Returns the term with name `s` and inner term `t`.
  */
-export function mkTerm(s, t) {
-    if (typeof s !== "string") {
-        throw Error(`Unexpected non-string: ${s} of type ${typeof s}.`)
+export function mkTerm(n, ts) {
+    if (typeof n !== "string") {
+        throw Error(`Illegal argument n: ${n}.`)
     }
-    if (t === undefined) {
-        throw Error(`Illegal argument : ${t}.`)
+    if (!Array.isArray(ts)) {
+        throw Error(`Illegal argument ts: ${ts}.`)
     }
 
-    return {type: 'TERM', name: s, t: t}
+    return {type: 'TERM', name: n, ts: ts}
 }
