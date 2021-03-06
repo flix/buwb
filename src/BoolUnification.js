@@ -1,15 +1,4 @@
-import {
-    FALSE,
-    freeVars,
-    isFalse,
-    isTrue,
-    mkAnd,
-    mkNot,
-    mkOr,
-    mkVar,
-    show,
-    TRUE
-} from "./Bools.js";
+import {FALSE, freeVars, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, show, TRUE} from "./Bools.js";
 import {applySubst} from "./Substitution";
 
 /**
@@ -77,12 +66,15 @@ function mergeSubst(s1, s2) {
     return result
 }
 
-function satisfiable(q) {
-    if (isTrue(q)) {
+/**
+ * Returns `true` if the given Boolean formula `f` is true.
+ */
+function satisfiable(f) {
+    if (isTrue(f)) {
         return true
-    } else if (isFalse(q)) {
+    } else if (isFalse(f)) {
         return false
     } else {
-        throw Error(`Unexpected formula ${q}.`)
+        throw Error(`Illegal argument 'f': ${f.toString()}.`)
     }
 }

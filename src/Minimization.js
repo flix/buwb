@@ -1,24 +1,8 @@
-import {TRUE, FALSE, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, size, show, truthRow} from "./Bools.js";
-import {applySubst} from "./Unification.js";
+import {mkAnd, mkNot, mkOr, mkVar, size, truthRow} from "./Bools.js";
 
-export function buildLookupTable(generator, fvs) {
-    let table = {}
-    for (let candidate of generator) {
-        let key = truthRow(candidate, fvs)
-        let current = table[key]
-        if (current === undefined) {
-            table[key] = candidate
-        } else {
-            let currentSize = current.size
-            let candidateSize = size(candidate)
-            if (currentSize > candidateSize) {
-                table[key] = candidate
-            }
-        }
-    }
-    return table
-}
-
+/**
+ * Generates Boolean formulas of the given depth and with the given array of variables.
+ */
 function* generate(depth, vars) {
     if (depth === 0) {
         for (let x of vars) {
@@ -37,20 +21,38 @@ function* generate(depth, vars) {
     }
 }
 
-// TODO: Prune the search tree based on how many times the same variable can occur.
+/**
+ * Builds a table of minimum Boolean formulas.
+ */
+export function buildTable(generator, fvs) {
+    let table = {}
+    for (let candidate of generator) {
+        let key = truthRow(candidate, fvs)
+        let current = table[key]
+        if (current === undefined) {
+            table[key] = candidate
+        } else {
+            let currentSize = current.size
+            let candidateSize = size(candidate)
+            if (currentSize > candidateSize) {
+                table[key] = candidate
+            }
+        }
+    }
+    return table
+}
 
+/**
+ * Generates a minimal table with the given number `n` of variables and the given `maxDepth`.
+ */
 function genTable(n, maxDepth) {
     let freeVars = []
     for (let i = 0; i < n; i++) {
         freeVars.push("x" + i)
     }
-    //console.log(`Variables = ${freeVars}`)
 
     let formulas = generate(maxDepth, freeVars)
-    let table = buildLookupTable(formulas, freeVars)
-    //console.log("Lookup Table Size  = ", Object.keys(table).length)
-
-    return table
+    return buildTable(formulas, freeVars)
 }
 
 let table = {

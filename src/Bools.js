@@ -139,30 +139,29 @@ export function mkOr(x, y) {
 }
 
 /**
- * Returns the size of the given formula `x`.
+ * Returns a human readable representation of the given formula.
  */
-export function size(x) {
+export function show(x) {
     if (isTrue(x)) {
-        return 1
+        return "true"
     } else if (isFalse(x)) {
-        return 1
+        return "false"
     } else if (isVar(x)) {
-        return 1
+        return x.name;
     } else if (isNot(x)) {
-        return size(x.f) + 1
+        return `¬ (${show(x.f)})`
     } else if (isAnd(x)) {
-        return size(x.f1) + size(x.f2) + 1
+        return `(${show(x.f1)}) ∧ (${show(x.f2)})`
     } else if (isOr(x)) {
-        return size(x.f1) + size(x.f2) + 1
+        return `(${show(x.f1)}) ∨ (${show(x.f2)})`
     } else {
         throw Error(`Unexpected argument: ${x}.`)
     }
 }
 
 /**
- * Returns the precedence of the given type `x`.
+ * Returns the precedence of the given connective `x`.
  */
-// TODO: FIX precedence in parser.
 export function precedence(x) {
     switch (x) {
         case "VAR":
@@ -179,6 +178,31 @@ export function precedence(x) {
             return 2
         default:
             throw Error(`Unexpected argument: ${x}.`)
+    }
+}
+
+/**
+ * Returns the size of the given Boolean formula `x`.
+ */
+export function size(x) {
+    if (x === undefined) {
+        throw new Error(`Illegal argument 'x': ${x}.`)
+    }
+
+    if (isTrue(x)) {
+        return 1
+    } else if (isFalse(x)) {
+        return 1
+    } else if (isVar(x)) {
+        return 1
+    } else if (isNot(x)) {
+        return size(x.f) + 1
+    } else if (isAnd(x)) {
+        return size(x.f1) + size(x.f2) + 1
+    } else if (isOr(x)) {
+        return size(x.f1) + size(x.f2) + 1
+    } else {
+        throw Error(`Unexpected argument: ${x}.`)
     }
 }
 
@@ -418,26 +442,5 @@ export function isSyntacticEq(x, y) {
         return isSyntacticEq(x.f1, y.f1) && isSyntacticEq(x.f2, y.f2)
     } else {
         return false
-    }
-}
-
-/**
- * Returns a human readable representation of the given formula.
- */
-export function show(x) {
-    if (isTrue(x)) {
-        return "true"
-    } else if (isFalse(x)) {
-        return "false"
-    } else if (isVar(x)) {
-        return x.name;
-    } else if (isNot(x)) {
-        return `¬ (${show(x.f)})`
-    } else if (isAnd(x)) {
-        return `(${show(x.f1)}) ∧ (${show(x.f2)})`
-    } else if (isOr(x)) {
-        return `(${show(x.f1)}) ∨ (${show(x.f2)})`
-    } else {
-        throw Error(`Unexpected argument: ${x}.`)
     }
 }
