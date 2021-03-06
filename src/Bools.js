@@ -1,9 +1,9 @@
-/**
- * The TRUE constant.
- */
 import {applySubst} from "./BoolUnification.js";
 import {Cache} from "./Cache.js";
 
+/**
+ * The TRUE constant.
+ */
 export let TRUE = {type: 'TRUE'}
 
 /**
@@ -63,7 +63,6 @@ export function mkVar(x) {
 
     return {type: 'VAR', name: x}
 }
-
 
 /**
  * Returns the negation of the formula `x`.
