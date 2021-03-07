@@ -74,8 +74,10 @@ class App extends Component {
         let result = unifyTerm(x, y)
         if (result.status === "success") {
             // Compute the truth table. (It does not matter if we use the lhs or rhs).
-            let f = applySubst(result.subst, this.state.lhsParsed.value)
-            let fvs = freeVars(f)
+            let lhs = this.state.lhsParsed.value;
+            let rhs = this.state.lhsParsed.value;
+            let f = applySubst(result.subst, lhs)
+            let fvs = freeVars(lhs).concat(freeVars(rhs))
             let tt = truthTable(f, fvs)
             this.setState({result: {freeVars: fvs, truthTable: tt, ...result}})
         } else {
