@@ -265,7 +265,7 @@ class App extends Component {
                 return (<div>
                     {this.renderSummary()}
                     <Card className="mt-3">
-                        <CardHeader>Substitution</CardHeader>
+                        <CardHeader>Substitution (Most General Unifier)</CardHeader>
                         <CardBody>
                             {this.renderSubstitution(Object.entries(result.subst))}
                         </CardBody>
@@ -310,11 +310,11 @@ class App extends Component {
         console.log(tt)
         if (isAllTrue(tt)) {
             return <Alert color="success" fade={false} className="mt-3">
-                <b>Note:</b> The unifiers reduce to TRUE, i.e. applying the mgu to both formulas reduce them to TRUE.
+                <b>Note:</b> The unifiers reduce to TRUE, i.e. applying the mgu (substitution) to both formulas reduce them to TRUE.
             </Alert>
         } else if (isAllFalse(tt)) {
             return <Alert color="success" fade={false}  className="mt-3">
-                <b>Note:</b> The unifiers reduce to FALSE, i.e. applying the mgu to both formulas reduce them to FALSE.
+                <b>Note:</b> The unifiers reduce to FALSE, i.e. applying the mgu (substitution)  to both formulas reduce them to FALSE.
             </Alert>
         } else {
             return undefined
