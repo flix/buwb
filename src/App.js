@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import './App.css';
 import {isTrue, truthTable, freeVars} from "./Bools";
 import {parse} from "./Parser";
-import {minimizeTerm, unifyTerm} from "./TermUnification";
+import {unifyTerm} from "./TermUnification";
 
 import {
     Alert,
@@ -36,8 +36,8 @@ import {
 } from "reactstrap";
 import {applySubst} from "./Substitution";
 import Header from "./components/Header";
-import Term from "./components/Term";
 import Summary from "./components/Summary";
+import Substitution from "./components/Substitution";
 
 class App extends Component {
 
@@ -269,12 +269,11 @@ class App extends Component {
             if (result.status === "success") {
                 return (<div>
                     <Summary truthTable={result.truthTable}/>
-                    <Card className="mt-3">
-                        <CardHeader>Substitution (Most General Unifier)</CardHeader>
-                        <CardBody>
-                            {this.renderSubstitution(Object.entries(result.subst))}
-                        </CardBody>
-                    </Card>
+                    <Substitution subst={Object.entries(result.subst)}
+                                  logicSymbols={this.state.logicSymbols}
+                                  minimize={this.state.minimize}
+                                  minimizeSubFormulas={this.state.minimizeSubFormulas}
+                                  parenthesize={this.state.parenthesize}/>
                     {this.renderTruthTable()}
                 </div>)
             } else if (result.status === "failure") {
@@ -290,26 +289,6 @@ class App extends Component {
             }
         }
     }
-
-    renderSubstitution(subst) {
-        return <Table>
-            <thead>
-            <tr>
-                <th>Variable</th>
-                <th>Formula</th>
-            </tr>
-            </thead>
-            <tbody>
-            {subst.map(([varSym, formula]) => (
-                <tr key={varSym}>
-                    <td>{varSym}</td>
-                    <td>{this.showTerm(formula)}</td>
-                </tr>
-            ))}
-            </tbody>
-        </Table>
-    }
-
 
     renderTruthTable() {
         if (!this.state.showTruthTable) {
@@ -341,15 +320,6 @@ class App extends Component {
                     </Table>
                 </CardBody>
             </Card>)
-    }
-
-    showTerm(term) {
-        if (this.state.minimize) {
-            let minTerm = minimizeTerm(term, this.state.minimizeSubFormulas);
-            return <Term term={minTerm} logicSymbols={this.state.logicSymbols} parenthesize={this.state.parenthesize}/>
-        } else {
-            return <Term term={term} logicSymbols={this.state.logicSymbols} parenthesize={this.state.parenthesize}/>
-        }
     }
 
 
