@@ -15,22 +15,29 @@
  */
 import React, {Component} from "react";
 import {isAllFalse, isAllTrue} from "../Bools";
-import {Alert} from "reactstrap";
+import {Alert, Row} from "reactstrap";
 
 class Summary extends Component {
 
     render() {
         let tt = this.props.truthTable
         if (isAllTrue(tt)) {
-            return <Alert color="success" fade={false} className="mt-3">
-                <b>Note:</b> The unifiers reduce to TRUE, i.e. applying the mgu (substitution) to both formulas reduce
-                them to TRUE.
-            </Alert>
+            return (
+                <Row className="col-12">
+                    <Alert color="success" fade={false} className="mt-3 w-100">
+                        <b>Note:</b> The unifiers reduce to TRUE, i.e. applying the mgu (substitution) to both formulas
+                        reduce them to TRUE.
+                    </Alert>
+                </Row>
+            )
         } else if (isAllFalse(tt)) {
-            return <Alert color="success" fade={false} className="mt-3">
-                <b>Note:</b> The unifiers reduce to FALSE, i.e. applying the mgu (substitution) to both formulas reduce
-                them to FALSE.
-            </Alert>
+            return (
+                <Row className="col-12">
+                    <Alert color="success" fade={false} className="mt-3 w-100">
+                        <b>Note:</b> The unifiers reduce to FALSE, i.e. applying the mgu (substitution) to both formulas
+                        reduce them to FALSE.
+                    </Alert>
+                </Row>)
         } else {
             return []
         }

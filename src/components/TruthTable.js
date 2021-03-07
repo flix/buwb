@@ -25,7 +25,7 @@ class TruthTable extends Component {
 
         return (
             <Row className="col-12">
-                <Card className="mt-3">
+                <Card className="mt-3 w-100">
                     <CardHeader>Truth Table</CardHeader>
                     <CardBody>
                         <Table borderless size="sm">

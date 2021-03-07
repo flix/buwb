@@ -29,7 +29,7 @@ class Substitution extends Component {
 
         return (
             <Row className="col-12">
-                <Card className="mt-3">
+                <Card className="mt-3 w-100">
                     <CardHeader>Substitution (Most General Unifier)</CardHeader>
                     <CardBody>
                         <Table>
