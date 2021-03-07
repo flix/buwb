@@ -1,12 +1,34 @@
-import {FALSE, freeVars, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, showBool, TRUE} from "./Bools.js";
+/*
+ *  Copyright 2021 Magnus Madsen
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+import {FALSE, freeVars, isBool, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, showBool, TRUE} from "./Bools.js";
 import {applySubst} from "./Substitution";
 
 /**
- * Returns a substitution that unifies p and q (if it exists).
+ * Returns a substitution that unifies f1 and f2 (if it exists).
  */
-export function boolUnify(p, q) {
+export function boolUnify(f1, f2) {
+    if (!isBool(f1)) {
+        throw new Error(`Illegal argument 'x': ${f1}.`)
+    }
+    if (!isBool(f2)) {
+        throw new Error(`Illegal argument 'y': ${f2}.`)
+    }
+
     // The boolean expression we want to show is 0.
-    let query = mkOr(mkAnd(p, mkNot(q)), mkAnd(mkNot(p), q))
+    let query = mkOr(mkAnd(f1, mkNot(f2)), mkAnd(mkNot(f1), f2))
 
     // The free variables in the query.
     let fvs = freeVars(query)
@@ -16,7 +38,7 @@ export function boolUnify(p, q) {
         return {status: "success", subst: subst}
     } catch (e) {
         if (e instanceof SVEError) {
-            return {status: "failure", reason: `Cannot unify: ${showBool(p)} and ${showBool(q)}`}
+            return {status: "failure", reason: `Cannot unify: ${showBool(f1)} and ${showBool(f2)}`}
         } else {
             throw e
         }
@@ -27,6 +49,13 @@ export function boolUnify(p, q) {
  * Returns a substitution that falsifies `f` (or reports that no such substitution exists).
  */
 function successiveVariableElimination(f, fvs) {
+    if (!isBool(f)) {
+        throw new Error(`Illegal argument 'f': ${f}.`)
+    }
+    if (!Array.isArray(fvs)) {
+        throw new Error(`Illegal argument 'fvs': ${fvs}.`)
+    }
+
     if (fvs.length === 0) {
         if (!satisfiable(f)) {
             return {}
@@ -44,25 +73,28 @@ function successiveVariableElimination(f, fvs) {
 }
 
 /**
- * A custom exception used in the successive variable elimination algorithm.
+ * Returns the left-biased composition of the substitutions `subst1` and `subst2`.
  */
-class SVEError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = "Boolean Unification Failure";
+function mergeSubst(subst1, subst2) {
+    if (typeof subst1 !== "object") {
+        throw new Error(`Illegal argument 'subst1': ${subst1}.`)
     }
-}
+    if (typeof subst2 !== "object") {
+        throw new Error(`Illegal argument 'subst2': ${subst2}.`)
+    }
 
-function mergeSubst(s1, s2) {
     let result = {}
-    for (let [key, value] of Object.entries(s1)) {
+
+    for (let [key, value] of Object.entries(subst1)) {
         result[key] = value
     }
-    for (let [key, value] of Object.entries(s2)) {
-        if (s2[key] !== undefined) {
+    for (let [key, value] of Object.entries(subst2)) {
+        // Left-biased.
+        if (subst1[key] === undefined) {
             result[key] = value
         }
     }
+
     return result
 }
 
@@ -70,11 +102,25 @@ function mergeSubst(s1, s2) {
  * Returns `true` if the given Boolean formula `f` is true.
  */
 function satisfiable(f) {
+    if (f === undefined) {
+        throw new Error(`Illegal argument 'f': ${f}.`)
+    }
+
     if (isTrue(f)) {
         return true
     } else if (isFalse(f)) {
         return false
     } else {
         throw Error(`Illegal argument 'f': ${f.toString()}.`)
+    }
+}
+
+/**
+ * A custom exception used in the successive variable elimination algorithm.
+ */
+class SVEError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "Boolean Unification Failure";
     }
 }
