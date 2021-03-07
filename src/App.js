@@ -15,39 +15,24 @@
  */
 import React, {Component} from 'react';
 import './App.css';
-import {truthTable, freeVars} from "./Bools";
-import {parse} from "./Parser";
-import {unifyTerm} from "./TermUnification";
+import {Container, Row} from "reactstrap";
 
-import {
-    Card,
-    CardHeader,
-    CardBody,
-    CustomInput,
-    Col,
-    Container,
-    Form,
-    FormGroup,
-    FormFeedback,
-    Input,
-    Row
-} from "reactstrap";
-import {applySubst} from "./Substitution";
 import Header from "./components/Header";
 import Summary from "./components/Summary";
 import Substitution from "./components/Substitution";
 import TruthTable from "./components/TruthTable";
 import UnificationFailure from "./components/UnificationFailure";
+import FormInput from "./components/FormInput";
+
+import {truthTable, freeVars} from "./Bools";
+import {unifyTerm} from "./TermUnification";
+import {applySubst} from "./Substitution";
 
 class App extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            lhsInput: "",
-            rhsInput: "",
-            lhsParsed: {valid: undefined},
-            rhsParsed: {valid: undefined},
             result: undefined,
             formatInput: true,
             logicSymbols: true,
@@ -55,36 +40,6 @@ class App extends Component {
             minimizeSubFormulas: true,
             showTruthTable: false,
             parenthesize: false,
-        }
-    }
-
-    notifyLHS(e) {
-        let lhsInput = this.format(e.target.value);
-        this.setState({lhsInput: lhsInput})
-        try {
-            let parseResult = parse(lhsInput)
-            this.setState({lhsParsed: {valid: true, value: parseResult}})
-            if (this.state.rhsParsed.valid) {
-                this.solve(parseResult, this.state.rhsParsed.value)
-            }
-        } catch (e) {
-            console.log(e)
-            this.setState({result: undefined, lhsParsed: {valid: false, error: e.toString()}})
-        }
-    }
-
-    notifyRHS(e) {
-        let rhsInput = this.format(e.target.value);
-        this.setState({rhsInput: rhsInput})
-        try {
-            let parseResult = parse(rhsInput)
-            this.setState({rhsParsed: {valid: true, value: parseResult}})
-            if (this.state.lhsParsed.valid) {
-                this.solve(this.state.lhsParsed.value, parseResult)
-            }
-        } catch (e) {
-            console.log(e)
-            this.setState({result: undefined, rhsParsed: {valid: false, error: e.toString()}})
         }
     }
 
@@ -106,16 +61,8 @@ class App extends Component {
         }
     }
 
-    format(x) {
-        if (!this.state.formatInput) {
-            return x
-        }
-
-        return x
-            .replaceAll("not", "¬")
-            .replaceAll("neg", "¬")
-            .replaceAll("and", "∧")
-            .replaceAll("or", "∨")
+    clear() {
+        this.setState({result: undefined})
     }
 
     toggleFormatInput() {
@@ -151,116 +98,33 @@ class App extends Component {
     render() {
         return (
             <Container>
-
                 <Header/>
 
-                <Row>
+                <FormInput
+                    formatInput={this.state.formatInput}
+                    toggleFormatInput={this.toggleFormatInput.bind(this)}
 
-                    <Card>
-                        <CardHeader>Enter two Boolean formulas to compute their most-general unifier (mgu)</CardHeader>
-                        <CardBody>
-                            <Form>
-                                <Row form>
-                                    <Col md={5}>
-                                        {this.renderLHSInput()}
-                                    </Col>
-                                    <Col md={2}>
-                                        <p className="qeq">=</p>
-                                    </Col>
-                                    <Col md={5}>
-                                        {this.renderRHSInput()}
-                                    </Col>
-                                </Row>
+                    logicSymbols={this.state.logicSymbols}
+                    toggleLogicSymbols={this.toggleLogicSymbols.bind(this)}
 
-                                <Row form>
-                                    <CustomInput id="reformat" type="checkbox"
-                                                 label="Reformat as you type"
-                                                 checked={this.state.formatInput}
-                                                 onChange={this.toggleFormatInput.bind(this)}
-                                                 inline/>
+                    minimize={this.state.minimize}
+                    toggleMinimize={this.toggleMinimize.bind(this)}
 
-                                    <CustomInput id="logicsymbols" type="checkbox"
-                                                 label="Use logic symbols"
-                                                 checked={this.state.logicSymbols}
-                                                 onChange={this.toggleLogicSymbols.bind(this)}
-                                                 inline
-                                    />
+                    minimizeSubFormulas={this.state.minimizeSubFormulas}
+                    toggleMinimizeSubFormulas={this.toggleMinimizeSubFormulas.bind(this)}
 
-                                    <CustomInput id="minimize" type="checkbox"
-                                                 label="Minimize formulas"
-                                                 checked={this.state.minimize}
-                                                 onChange={this.toggleMinimize.bind(this)}
-                                                 inline
-                                    />
+                    showTruthTable={this.state.showTruthTable}
+                    toggleShowTruthTable={this.toggleShowTruthTable.bind(this)}
 
-                                    <CustomInput id="minimizeSubFormulas" type="checkbox"
-                                                 label="Recursively minimize"
-                                                 checked={this.state.minimizeSubFormulas}
-                                                 disabled={!this.state.minimize}
-                                                 onChange={this.toggleMinimizeSubFormulas.bind(this)}
-                                                 inline
-                                    />
+                    parenthesize={this.state.parenthesize}
+                    toggleParenthesize={this.toggleParenthesize.bind(this)}
 
-                                    <CustomInput id="showTruthTable" type="checkbox"
-                                                 label="Show truth table"
-                                                 checked={this.state.showTruthTable}
-                                                 onChange={this.toggleShowTruthTable.bind(this)}
-                                                 inline
-                                    />
-
-                                    <CustomInput id="parenthesize" type="checkbox"
-                                                 label="Fully parenthesize"
-                                                 checked={this.state.parenthesize}
-                                                 onChange={this.toggleParenthesize.bind(this)}
-                                                 inline
-                                    />
-                                </Row>
-                            </Form>
-                        </CardBody>
-                    </Card>
-
-                </Row>
+                    notifySolve={this.solve.bind(this)}
+                    notifyClear={this.clear.bind(this)}
+                />
 
                 {this.renderResult()}
-
             </Container>);
-    }
-
-    renderLHSInput() {
-        if (this.state.lhsInput === "" || this.state.lhsParsed.valid) {
-            return <FormGroup>
-                <Input id="lhs" type="text" bsSize="lg" autoFocus autoComplete="off"
-                       value={this.state.lhsInput}
-                       onChange={this.notifyLHS.bind(this)}
-                />
-            </FormGroup>
-        } else {
-            return <FormGroup>
-                <Input id="lhs" type="text" bsSize="lg" autoComplete="off"
-                       value={this.state.lhsInput}
-                       onChange={this.notifyLHS.bind(this)}
-                       invalid={true}/>
-                <FormFeedback invalid={"yes"}>{this.state.lhsParsed.error}</FormFeedback>
-            </FormGroup>
-        }
-    }
-
-    renderRHSInput() {
-        if (this.state.rhsInput === "" || this.state.rhsParsed.valid) {
-            return <FormGroup>
-                <Input id="lhs" type="text" bsSize="lg" autoComplete="off"
-                       value={this.state.rhsInput}
-                       onChange={this.notifyRHS.bind(this)}/>
-            </FormGroup>
-        } else {
-            return <FormGroup>
-                <Input id="lhs" type="text" bsSize="lg" autoComplete="off"
-                       value={this.state.rhsInput}
-                       onChange={this.notifyRHS.bind(this)}
-                       invalid/>
-                <FormFeedback invalid={"yes"}>{this.state.rhsParsed.error}</FormFeedback>
-            </FormGroup>
-        }
     }
 
     renderResult() {
