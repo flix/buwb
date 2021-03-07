@@ -1,6 +1,21 @@
+/*
+ *  Copyright 2021 Magnus Madsen
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 import React, {Component} from 'react';
 import './App.css';
-import {isTrue, truthTable, freeVars, isAllTrue, isAllFalse} from "./Bools";
+import {isTrue, truthTable, freeVars} from "./Bools";
 import {parse} from "./Parser";
 import {minimizeTerm, unifyTerm} from "./TermUnification";
 
@@ -22,6 +37,7 @@ import {
 import {applySubst} from "./Substitution";
 import Header from "./components/Header";
 import Term from "./components/Term";
+import Summary from "./components/Summary";
 
 class App extends Component {
 
@@ -252,7 +268,7 @@ class App extends Component {
         if (result !== undefined) {
             if (result.status === "success") {
                 return (<div>
-                    {this.renderSummary()}
+                    <Summary truthTable={result.truthTable}/>
                     <Card className="mt-3">
                         <CardHeader>Substitution (Most General Unifier)</CardHeader>
                         <CardBody>
@@ -294,23 +310,6 @@ class App extends Component {
         </Table>
     }
 
-    renderSummary() {
-        let tt = this.state.result.truthTable
-        console.log(tt)
-        if (isAllTrue(tt)) {
-            return <Alert color="success" fade={false} className="mt-3">
-                <b>Note:</b> The unifiers reduce to TRUE, i.e. applying the mgu (substitution) to both formulas reduce
-                them to TRUE.
-            </Alert>
-        } else if (isAllFalse(tt)) {
-            return <Alert color="success" fade={false} className="mt-3">
-                <b>Note:</b> The unifiers reduce to FALSE, i.e. applying the mgu (substitution) to both formulas reduce
-                them to FALSE.
-            </Alert>
-        } else {
-            return undefined
-        }
-    }
 
     renderTruthTable() {
         if (!this.state.showTruthTable) {
