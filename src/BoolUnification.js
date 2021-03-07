@@ -20,10 +20,10 @@ import {applySubst} from "./Substitution";
  * Returns a substitution that unifies f1 and f2 (if it exists).
  */
 export function boolUnify(f1, f2) {
-    if (!isBool(f1)) {
+    if (f1 === undefined || !isBool(f1)) {
         throw new Error(`Illegal argument 'x': ${f1}.`)
     }
-    if (!isBool(f2)) {
+    if (f2 === undefined || !isBool(f2)) {
         throw new Error(`Illegal argument 'y': ${f2}.`)
     }
 
