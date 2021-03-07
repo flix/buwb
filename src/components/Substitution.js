@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 import React, {Component} from "react";
-import {Card, CardBody, CardHeader, Table} from "reactstrap";
+import {Card, CardBody, CardHeader, Row, Table} from "reactstrap";
 import {minimizeTerm} from "../TermUnification";
 import Term from "./Term";
 
@@ -28,27 +28,29 @@ class Substitution extends Component {
         let parenthesize = this.props.parenthesize
 
         return (
-            <Card className="mt-3">
-                <CardHeader>Substitution (Most General Unifier)</CardHeader>
-                <CardBody>
-                    <Table>
-                        <thead>
-                        <tr>
-                            <th>Variable</th>
-                            <th>Formula</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {subst.map(([varSym, term]) => (
-                            <tr key={varSym}>
-                                <td>{varSym}</td>
-                                <td>{this.renderTerm(term, logicSymbols, minimize, minimizeSubFormulas, parenthesize)}</td>
+            <Row className="col-12">
+                <Card className="mt-3">
+                    <CardHeader>Substitution (Most General Unifier)</CardHeader>
+                    <CardBody>
+                        <Table>
+                            <thead>
+                            <tr>
+                                <th>Variable</th>
+                                <th>Formula</th>
                             </tr>
-                        ))}
-                        </tbody>
-                    </Table>
-                </CardBody>
-            </Card>
+                            </thead>
+                            <tbody>
+                            {subst.map(([varSym, term]) => (
+                                <tr key={varSym}>
+                                    <td>{varSym}</td>
+                                    <td>{this.renderTerm(term, logicSymbols, minimize, minimizeSubFormulas, parenthesize)}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </Table>
+                    </CardBody>
+                </Card>
+            </Row>
         )
     }
 

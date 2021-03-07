@@ -272,7 +272,7 @@ class App extends Component {
                 let fvs = this.state.result.freeVars
                 let tt = this.state.result.truthTable
 
-                return (<div>
+                return (<Row>
                     <Summary truthTable={result.truthTable}/>
                     <Substitution subst={Object.entries(result.subst)}
                                   logicSymbols={this.state.logicSymbols}
@@ -281,7 +281,7 @@ class App extends Component {
                                   parenthesize={this.state.parenthesize}/>
 
                     {this.state.showTruthTable ? <TruthTable freeVars={fvs} truthTable={tt}/> : []}
-                </div>)
+                </Row>)
             } else if (result.status === "failure") {
                 return <Alert color="danger" className="mt-3">
                     <h4 className="alert-heading">Unification Failure</h4>

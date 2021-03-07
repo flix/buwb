@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 import React, {Component} from "react";
-import {Card, CardBody, CardHeader, Table} from "reactstrap";
+import {Card, CardBody, CardHeader, Row, Table} from "reactstrap";
 import {isTrue} from "../Bools";
 
 class TruthTable extends Component {
@@ -24,27 +24,29 @@ class TruthTable extends Component {
         let tt = this.props.truthTable
 
         return (
-            <Card className="mt-3">
-                <CardHeader>Truth Table</CardHeader>
-                <CardBody>
-                    <Table borderless size="sm">
-                        <thead>
-                        <tr>
-                            {fvs.map(f => <th>{f}</th>)}
-                            <th>R</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {tt.map(row => {
-                            let className = isTrue(row[row.length - 1]) ? "table-active" : ""
-                            return <tr className={className}>
-                                {row.map(t => isTrue(t) ? <td>T</td> : <td>F</td>)}
+            <Row className="col-12">
+                <Card className="mt-3">
+                    <CardHeader>Truth Table</CardHeader>
+                    <CardBody>
+                        <Table borderless size="sm">
+                            <thead>
+                            <tr>
+                                {fvs.map(f => <th>{f}</th>)}
+                                <th>R</th>
                             </tr>
-                        })}
-                        </tbody>
-                    </Table>
-                </CardBody>
-            </Card>)
+                            </thead>
+                            <tbody>
+                            {tt.map(row => {
+                                let className = isTrue(row[row.length - 1]) ? "table-active" : ""
+                                return <tr className={className}>
+                                    {row.map(t => isTrue(t) ? <td>T</td> : <td>F</td>)}
+                                </tr>
+                            })}
+                            </tbody>
+                        </Table>
+                    </CardBody>
+                </Card>
+            </Row>)
     }
 
 }
