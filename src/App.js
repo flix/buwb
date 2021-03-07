@@ -171,6 +171,7 @@ class App extends Component {
                                 <CustomInput id="minimizeSubFormulas" type="checkbox"
                                              label="Recursively minimize"
                                              checked={this.state.minimizeSubFormulas}
+                                             disabled={!this.state.minimize}
                                              onChange={this.toggleMinimizeSubFormulas.bind(this)}
                                              inline
                                 />

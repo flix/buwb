@@ -1,4 +1,19 @@
-import {showBool} from "./Bools";
+/*
+ *  Copyright 2021 Magnus Madsen
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+import {isBool, showBool} from "./Bools";
 
 /**
  * Returns `true` if the given `x` is a constructor.
@@ -8,26 +23,37 @@ export function isConstructor(x) {
 }
 
 /**
- * Returns the term with name `s` and inner term `t`.
+ * Returns a constructor term with the given `name` and sub `terms`.
  */
-export function mkConstructor(n, ts) {
-    if (typeof n !== "string") {
-        throw Error(`Illegal argument n: ${n}.`)
+export function mkConstructor(name, terms) {
+    if (typeof name !== "string") {
+        throw Error(`Illegal argument 'name': ${name}.`)
     }
-    if (!Array.isArray(ts)) {
-        throw Error(`Illegal argument ts: ${ts}.`)
+    if (!Array.isArray(terms)) {
+        throw Error(`Illegal argument 'terms': ${terms}.`)
     }
 
-    return {type: 'CONST', name: n, ts: ts}
+    return {type: 'CONST', name: name, ts: terms}
 }
 
 /**
- * Returns a human readable representation of the given term.
+ * Returns a human readable representation of the given `term`.
  */
-export function showTerm(x) {
-    if (isConstructor(x)) {
-        return `${x.name}(${x.ts.map(t => showTerm(t)).join(", ")})`
+export function showTerm(term) {
+    if (term === undefined) {
+        throw new Error(`Illegal argument 'term': ${term}.`)
+    }
+
+    if (isBool(term)) {
+        return showBool(term)
+    } else if (isConstructor(term)) {
+        let terms = term.ts.map(t => showTerm(t)).join(", ")
+        if (terms.length === 0) {
+            return term.name
+        } else {
+            return `${term.name}(${terms})`
+        }
     } else {
-        return showBool(x)
+        throw new Error(`Illegal argument 'term': ${term}.`)
     }
 }
