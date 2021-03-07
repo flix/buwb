@@ -195,34 +195,34 @@ export function showBool(f) {
 }
 
 /**
- * Returns the size of the given Boolean formula `x`.
+ * Returns the size of the given Boolean formula `f`.
  */
-export function size(x) {
-    if (x === undefined) {
-        throw new Error(`Illegal argument 'x': ${x}.`)
-    }
+export function size(f) {
+    if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
 
-    if (isTrue(x)) {
+    if (isTrue(f)) {
         return 1
-    } else if (isFalse(x)) {
+    } else if (isFalse(f)) {
         return 1
-    } else if (isVar(x)) {
+    } else if (isVar(f)) {
         return 1
-    } else if (isNot(x)) {
-        return size(x.f) + 1
-    } else if (isAnd(x)) {
-        return size(x.f1) + size(x.f2) + 1
-    } else if (isOr(x)) {
-        return size(x.f1) + size(x.f2) + 1
+    } else if (isNot(f)) {
+        return size(f.f) + 1
+    } else if (isAnd(f)) {
+        return size(f.f1) + size(f.f2) + 1
+    } else if (isOr(f)) {
+        return size(f.f1) + size(f.f2) + 1
     } else {
-        throw Error(`Unexpected argument: ${x}.`)
+        throw Error(`Unexpected argument 'f': ${f}.`)
     }
 }
 
 /**
- * Returns all the free variables in the formula `x`.
+ * Returns all the free variables in the formula `f`.
  */
-export function freeVars(x) {
+export function freeVars(f) {
+    if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
+
     let result = new Set()
 
     function visit(w) {
@@ -241,133 +241,29 @@ export function freeVars(x) {
             visit(w.f1)
             visit(w.f2)
         } else {
-            throw Error(`Unexpected argument: ${x}.`)
+            throw Error(`Unexpected argument: ${f}.`)
         }
     }
 
-    visit(x)
+    visit(f)
 
     return [...result].sort()
 }
 
 /**
- * Returns the truth table for the given formula `x`.
- *
- * The truth table is a multi dimensional array of the form:
- *
- * [
- *   [T, T, T... T]
- *   [T, T, F... F]
- * ]
- *
- * where each row is a valuation and last col is the result.
+ * Returns the last column of the truth table of the formula `f`.
  */
-export function truthtable(x, freeVars) {
-    if (x === undefined) throw new Error(`Illegal argument x: ${x}.`)
-    if (freeVars === undefined) throw new Error(`Illegal argument freeVars: ${freeVars}.`)
-
-    function visit(f, fvs) {
-        if (fvs.length === 0) {
-            return [[f]];
-        } else {
-            let [x, ...xs] = fvs;
-            let f1 = applySubst({[x]: TRUE}, f)
-            let f2 = applySubst({[x]: FALSE}, f)
-
-            let extendedRows1 = visit(f1, xs).map(row => [TRUE, ...row])
-            let extendedRows2 = visit(f2, xs).map(row => [FALSE, ...row])
-            return extendedRows1.concat(extendedRows2)
-        }
-    }
-
-    return visit(x, freeVars)
-}
-
-/**
- * Returns the CNF form of the given formula `x`.
- */
-export function cnf(x) {
-    if (x === undefined) throw new Error(`Illegal argument x: ${x}.`)
-    return cnfAndDnf(x).cnf;
-}
-
-/**
- * Returns the DNF form of the given formula `x`.
- */
-export function dnf(x) {
-    if (x === undefined) throw new Error(`Illegal argument x: ${x}.`)
-    return cnfAndDnf(x).dnf;
-}
-
-/**
- * Returns the CNF and DNF form of the given formula `x`.
- *
- * If you want to find CNF, you have to look at all rows that ends with F.
- * When you find those rows, take the inverted x,y, and z values from each respective column.
- *
- * If you want to find DNF, you have to look at all rows that ends with T.
- * When you find those rows, take the x,y, and z values from each respective column.
- *
- * See https://math.stackexchange.com/questions/636119/find-dnf-and-cnf-of-an-expression
- */
-export function cnfAndDnf(x) {
-    // Compute the free variables and the truth table.
-    let fvs = freeVars(x)
-    let tt = truthtable(x, fvs)
-
-    // Returns the formula if it has no free variables.
-    if (fvs.length === 0) {
-        return x
-    }
-
-    let cnf = TRUE
-    let dnf = FALSE
-    tt.forEach(row => {
-        let lastElm = row[fvs.length];
-        if (isTrue(lastElm)) {
-            let f = TRUE
-            for (let i = 0; i < fvs.length; i++) {
-                let currVar = mkVar(fvs[i])
-                let currElm = row[i]
-                if (isTrue(currElm)) {
-                    f = mkAnd(f, currVar)
-                } else if (isFalse(currElm)) {
-                    f = mkAnd(f, mkNot(currVar))
-                } else {
-                    throw new Error(`Unexpected value: ${currElm}.`)
-                }
-            }
-            dnf = mkOr(dnf, f)
-        } else if (isFalse(lastElm)) {
-            let f = FALSE
-            for (let i = 0; i < fvs.length; i++) {
-                let currVar = mkVar(fvs[i])
-                let currElm = row[i]
-                if (isTrue(currElm)) {
-                    f = mkOr(f, mkNot(currVar))
-                } else if (isFalse(currElm)) {
-                    f = mkOr(f, currVar)
-                } else {
-                    throw new Error(`Unexpected value: ${currElm}.`)
-                }
-            }
-            cnf = mkAnd(cnf, f)
-        } else {
-            throw new Error(`Unexpected value: ${lastElm}.`)
-        }
-    })
-
-    return {cnf: cnf, dnf: dnf};
-}
-
 export function truthRow(f, fvs) {
+    if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
+    if (!Array.isArray(fvs)) throw new Error(`Illegal argument 'fvs': ${fvs}.`)
+
     if (fvs.length === 0) {
         if (isTrue(f)) {
             return "T"
         } else if (isFalse(f)) {
             return "F"
         } else {
-            throw new Error(`Unexpected value: ${f}.`)
+            throw new Error(`Unexpected value 'f': ${f}.`)
         }
     } else {
         let [x, ...xs] = fvs
@@ -376,56 +272,69 @@ export function truthRow(f, fvs) {
 }
 
 /**
- * Optionally returns a minified version of formula `x`.
+ * Returns the minimized version of the formula `f`.
  */
-export function minBool(x, recursively) {
-    if (recursively === true) {
-        return minBoolRecursively(x)
-    } else if (recursively === false) {
-        return lookup(x)
+export function minBool(f, recurse) {
+    if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
+    if (typeof recurse !== "boolean") throw new Error(`Illegal argument 'recurse': ${recurse}.`)
+
+    if (recurse === true) {
+        return minBoolRecursively(f)
+    } else if (recurse === false) {
+        return lookup(f)
     } else {
-        throw new Error(`Illegal non-Boolean argument: ${recursively}.`)
+        throw new Error(`Illegal non-Boolean argument: ${recurse}.`)
     }
 }
 
 /**
- * Recursively minimizes the formula `x`.
+ * Recursively minimizes the formula `f`.
  */
-function minBoolRecursively(x) {
-    if (isTrue(x)) {
-        return x
-    } else if (isFalse(x)) {
-        return x
-    } else if (isVar(x)) {
-        return x
-    } else if (isNot(x)) {
-        return lookup(mkNot(minBoolRecursively(x.f)))
-    } else if (isAnd(x)) {
-        return lookup(mkAnd(minBoolRecursively(x.f1), minBoolRecursively(x.f2)))
-    } else if (isOr(x)) {
-        return lookup(mkOr(minBoolRecursively(x.f1), minBoolRecursively(x.f2)))
+function minBoolRecursively(f) {
+    if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
+
+    if (isTrue(f)) {
+        return f
+    } else if (isFalse(f)) {
+        return f
+    } else if (isVar(f)) {
+        return f
+    } else if (isNot(f)) {
+        return lookup(mkNot(minBoolRecursively(f.f)))
+    } else if (isAnd(f)) {
+        return lookup(mkAnd(minBoolRecursively(f.f1), minBoolRecursively(f.f2)))
+    } else if (isOr(f)) {
+        return lookup(mkOr(minBoolRecursively(f.f1), minBoolRecursively(f.f2)))
     } else {
-        throw Error(`Unexpected argument: ${x}.`)
+        throw Error(`Illegal argument 'f': ${f}.`)
     }
 }
 
 /**
- * Looks up the formula `x` in the cached table for minimal formulas.
+ * Looks up the formula `f` in the cached table of minimal formulas.
  */
-function lookup(x) {
-    let fvs = freeVars(x)
+function lookup(f) {
+    if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
+
+    let fvs = freeVars(f)
     let n = fvs.length
     let table = Cache[n]
 
     if (table === undefined) {
-        return x
+        // No lookup table. Simply return the formula.
+        return f
     } else {
-        let resultVector = truthRow(x, fvs)
+        // Compute the "semantics" of the formula.
+        let resultVector = truthRow(f, fvs)
+
+        // Look it up in the table.
         let minimal = table[resultVector]
         if (minimal === undefined) {
-            return x
+            // Not found.
+            return f
         }
 
+        // Found - but must use original variable names.
         let subst = {}
         for (let i = 0; i < fvs.length; i++) {
             subst["x" + i] = mkVar(fvs[i])
@@ -433,4 +342,3 @@ function lookup(x) {
         return applySubst(subst, minimal)
     }
 }
-
