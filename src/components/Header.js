@@ -20,7 +20,7 @@ class Header extends Component {
 
     render() {
         return (
-            <Row>
+            <Row className="col-12">
                 <h1>Boolean Unification Workbench</h1>
 
                 <blockquote>

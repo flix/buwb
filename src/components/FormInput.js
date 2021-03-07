@@ -14,18 +14,7 @@
  *  limitations under the License.
  */
 import React, {Component} from "react";
-import {
-    Card,
-    CardBody,
-    CardHeader,
-    Col,
-    CustomInput,
-    Form,
-    FormFeedback,
-    FormGroup,
-    Input,
-    Row
-} from "reactstrap";
+import {Card, CardBody, CardHeader, Col, CustomInput, Form, FormFeedback, FormGroup, Input, Row} from "reactstrap";
 import {parse} from "../Parser";
 
 class FormInput extends Component {
@@ -84,7 +73,7 @@ class FormInput extends Component {
         let toggleLogicSymbols = this.props.toggleLogicSymbols
         let toggleMinimize = this.props.toggleMinimize
         let toggleMinimizeSubFormulas = this.props.toggleMinimizeSubFormulas
-        let toggleShowTruthTable = this.props.toggleShowTruthTable
+        let toggleTruthTable = this.props.toggleTruthTable
         let toggleParenthesize = this.props.toggleParenthesize
 
         return (
@@ -137,7 +126,7 @@ class FormInput extends Component {
                                 <CustomInput id="showTruthTable" type="checkbox"
                                              label="Show truth table"
                                              checked={showTruthTable}
-                                             onChange={toggleShowTruthTable}
+                                             onChange={toggleTruthTable}
                                              inline
                                 />
 

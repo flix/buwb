@@ -38,12 +38,12 @@ class App extends Component {
             logicSymbols: true,
             minimize: true,
             minimizeSubFormulas: true,
-            showTruthTable: false,
+            truthTable: false,
             parenthesize: false,
         }
     }
 
-    solve(x, y) {
+    notifySolve(x, y) {
         let result = unifyTerm(x, y)
         if (result.status === "success") {
             // Compute the free variables in the input lhs and rhs.
@@ -61,7 +61,7 @@ class App extends Component {
         }
     }
 
-    clear() {
+    notifyClear() {
         this.setState({result: undefined})
     }
 
@@ -87,8 +87,8 @@ class App extends Component {
         this.setState({minimizeSubFormulas: !this.state.minimizeSubFormulas})
     }
 
-    toggleShowTruthTable() {
-        this.setState({showTruthTable: !this.state.showTruthTable})
+    toggleTruthTable() {
+        this.setState({truthTable: !this.state.truthTable})
     }
 
     toggleParenthesize() {
@@ -113,14 +113,14 @@ class App extends Component {
                     minimizeSubFormulas={this.state.minimizeSubFormulas}
                     toggleMinimizeSubFormulas={this.toggleMinimizeSubFormulas.bind(this)}
 
-                    showTruthTable={this.state.showTruthTable}
-                    toggleShowTruthTable={this.toggleShowTruthTable.bind(this)}
+                    showTruthTable={this.state.truthTable}
+                    toggleTruthTable={this.toggleTruthTable.bind(this)}
 
                     parenthesize={this.state.parenthesize}
                     toggleParenthesize={this.toggleParenthesize.bind(this)}
 
-                    notifySolve={this.solve.bind(this)}
-                    notifyClear={this.clear.bind(this)}
+                    notifySolve={this.notifySolve.bind(this)}
+                    notifyClear={this.notifyClear.bind(this)}
                 />
 
                 {this.renderResult()}
@@ -133,7 +133,7 @@ class App extends Component {
             if (result.status === "success") {
                 let fvs = this.state.result.freeVars
                 let tt = this.state.result.truthTable
-                return (<Row>
+                return (<div>
                     <Summary truthTable={result.truthTable}/>
                     <Substitution subst={Object.entries(result.subst)}
                                   logicSymbols={this.state.logicSymbols}
@@ -142,7 +142,7 @@ class App extends Component {
                                   parenthesize={this.state.parenthesize}/>
 
                     {this.state.showTruthTable ? <TruthTable freeVars={fvs} truthTable={tt}/> : []}
-                </Row>)
+                </div>)
             } else if (result.status === "failure") {
                 return <UnificationFailure reason={result.reason}/>
             } else {
