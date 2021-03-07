@@ -80,7 +80,7 @@ export function isBool(f) {
  */
 export function mkVar(name) {
     if (typeof name !== "string") {
-        throw Error(`Illegal argument 'name': ${name}.`)
+        throw new Error(`Illegal argument 'name': ${name}.`)
     }
 
     return {type: 'VAR', name: name}
@@ -190,7 +190,7 @@ export function showBool(f) {
     } else if (isOr(f)) {
         return `(${showBool(f.f1)}) ∨ (${showBool(f.f2)})`
     } else {
-        throw Error(`Unexpected argument 'f': ${f}.`)
+        throw new Error(`Unexpected argument 'f': ${f}.`)
     }
 }
 
@@ -213,7 +213,7 @@ export function size(f) {
     } else if (isOr(f)) {
         return size(f.f1) + size(f.f2) + 1
     } else {
-        throw Error(`Unexpected argument 'f': ${f}.`)
+        throw new Error(`Unexpected argument 'f': ${f}.`)
     }
 }
 
@@ -241,7 +241,7 @@ export function freeVars(f) {
             visit(w.f1)
             visit(w.f2)
         } else {
-            throw Error(`Unexpected argument: ${f}.`)
+            throw new Error(`Unexpected argument: ${f}.`)
         }
     }
 
@@ -339,7 +339,7 @@ function minBoolRecursively(f) {
     } else if (isOr(f)) {
         return lookup(mkOr(minBoolRecursively(f.f1), minBoolRecursively(f.f2)))
     } else {
-        throw Error(`Illegal argument 'f': ${f}.`)
+        throw new Error(`Illegal argument 'f': ${f}.`)
     }
 }
 

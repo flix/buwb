@@ -47,7 +47,7 @@ export function applySubst(subst, term) {
     } else if (isOr(term)) {
         return mkOr(applySubst(subst, term.f1), applySubst(subst, term.f2))
     } else {
-        throw Error(`Unexpected argument 'term': ${term}.`)
+        throw new Error(`Unexpected argument 'term': ${term}.`)
     }
 }
 

@@ -27,10 +27,10 @@ export function isConstructor(x) {
  */
 export function mkConstructor(name, terms) {
     if (typeof name !== "string") {
-        throw Error(`Illegal argument 'name': ${name}.`)
+        throw new Error(`Illegal argument 'name': ${name}.`)
     }
     if (!Array.isArray(terms)) {
-        throw Error(`Illegal argument 'terms': ${terms}.`)
+        throw new Error(`Illegal argument 'terms': ${terms}.`)
     }
 
     return {type: 'CONST', name: name, ts: terms}

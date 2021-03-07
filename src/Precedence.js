@@ -31,6 +31,6 @@ export function precedence(x) {
         case "OR":
             return 2
         default:
-            throw Error(`Unexpected argument: ${x}.`)
+            throw new Error(`Unexpected argument: ${x}.`)
     }
 }

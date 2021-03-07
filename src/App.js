@@ -387,7 +387,7 @@ class App extends Component {
                     return <span>{visit(x.f1)} {disj} {visit(x.f2)}</span>
                 }
             } else {
-                throw Error(`Unexpected argument: ${x}.`)
+                throw new Error(`Unexpected argument: ${x}.`)
             }
         }
 
