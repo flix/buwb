@@ -1,6 +1,8 @@
 # Boolean Unification Workbench (BUWB)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The online workbench is available at:
+
+[https://flix.dev/buwb/](https://flix.dev/buwb/) 
 
 ## Available Scripts
 
