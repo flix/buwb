@@ -37,6 +37,7 @@ class App extends Component {
             logicSymbols: true,
             minimize: true,
             minimizeSubFormulas: true,
+            showTruthTable: false,
             parenthesize: false,
         }
     }
@@ -106,6 +107,10 @@ class App extends Component {
 
     toggleMinimizeSubFormulas() {
         this.setState({minimizeSubFormulas: !this.state.minimizeSubFormulas})
+    }
+
+    toggleShowTruthTable() {
+        this.setState({showTruthTable: !this.state.showTruthTable})
     }
 
     toggleParenthesize() {
@@ -178,6 +183,13 @@ class App extends Component {
                                              inline
                                 />
 
+                                <CustomInput id="showTruthTable" type="checkbox"
+                                             label="Show truth table"
+                                             checked={this.state.showTruthTable}
+                                             onChange={this.toggleShowTruthTable.bind(this)}
+                                             inline
+                                />
+
                                 <CustomInput id="parenthesize" type="checkbox"
                                              label="Fully parenthesize"
                                              checked={this.state.parenthesize}
@@ -242,7 +254,6 @@ class App extends Component {
                             {this.renderSubstitution(Object.entries(result.subst))}
                         </CardBody>
                     </Card>
-                    <hr/>
                     {this.renderTruthTable(result.subst)}
                 </div>)
             } else if (result.status === "failure") {
@@ -279,6 +290,10 @@ class App extends Component {
     }
 
     renderTruthTable(subst) {
+        if (!this.state.showTruthTable) {
+            return undefined
+        }
+
         let f1 = this.state.lhsParsed.value
         let f = applySubst(subst, f1)
         let fvs = freeVars(f)
