@@ -38,6 +38,7 @@ import {applySubst} from "./Substitution";
 import Header from "./components/Header";
 import Summary from "./components/Summary";
 import Substitution from "./components/Substitution";
+import TruthTable from "./components/TruthTable";
 
 class App extends Component {
 
@@ -267,6 +268,10 @@ class App extends Component {
         let result = this.state.result;
         if (result !== undefined) {
             if (result.status === "success") {
+
+                let fvs = this.state.result.freeVars
+                let tt = this.state.result.truthTable
+
                 return (<div>
                     <Summary truthTable={result.truthTable}/>
                     <Substitution subst={Object.entries(result.subst)}
@@ -274,7 +279,8 @@ class App extends Component {
                                   minimize={this.state.minimize}
                                   minimizeSubFormulas={this.state.minimizeSubFormulas}
                                   parenthesize={this.state.parenthesize}/>
-                    {this.renderTruthTable()}
+
+                    {this.state.showTruthTable ? <TruthTable freeVars={fvs} truthTable={tt}/> : []}
                 </div>)
             } else if (result.status === "failure") {
                 return <Alert color="danger" className="mt-3">
@@ -289,39 +295,6 @@ class App extends Component {
             }
         }
     }
-
-    renderTruthTable() {
-        if (!this.state.showTruthTable) {
-            return undefined
-        }
-
-        let fvs = this.state.result.freeVars
-        let tt = this.state.result.truthTable
-
-        return (
-            <Card className="mt-3">
-                <CardHeader>Truth Table</CardHeader>
-                <CardBody>
-                    <Table borderless size="sm">
-                        <thead>
-                        <tr>
-                            {fvs.map(f => <th>{f}</th>)}
-                            <th>R</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {tt.map(row => {
-                            let className = isTrue(row[row.length - 1]) ? "table-active" : ""
-                            return <tr className={className}>
-                                {row.map(t => isTrue(t) ? <td>T</td> : <td>F</td>)}
-                            </tr>
-                        })}
-                        </tbody>
-                    </Table>
-                </CardBody>
-            </Card>)
-    }
-
 
 }
 
