@@ -272,6 +272,39 @@ export function truthRow(f, fvs) {
 }
 
 /**
+ * Returns the truth table for the given formula `f`.
+ *
+ * The truth table is a multi dimensional array of the form:
+ *
+ * [
+ *   [T, T, T... T]
+ *   [T, T, F... F]
+ * ]
+ *
+ * where each row is a valuation and last col is the result.
+ */
+export function truthTable(f, fvs) {
+    if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
+    if (!Array.isArray(fvs)) throw new Error(`Illegal argument 'fvs': ${fvs}.`)
+
+    function visit(f, fvs) {
+        if (fvs.length === 0) {
+            return [[f]];
+        } else {
+            let [x, ...xs] = fvs;
+            let f1 = applySubst({[x]: TRUE}, f)
+            let f2 = applySubst({[x]: FALSE}, f)
+
+            let extendedRows1 = visit(f1, xs).map(row => [TRUE, ...row])
+            let extendedRows2 = visit(f2, xs).map(row => [FALSE, ...row])
+            return extendedRows1.concat(extendedRows2)
+        }
+    }
+
+    return visit(f, fvs)
+}
+
+/**
  * Returns the minimized version of the formula `f`.
  */
 export function minBool(f, recurse) {

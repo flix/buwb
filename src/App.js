@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {isTrue, isFalse, isVar, isNot, isAnd, isOr} from "./Bools";
+import {isTrue, isFalse, isVar, isNot, isAnd, isOr, truthTable, freeVars} from "./Bools";
 import {parse} from "./Parser";
 import {minimizeTerm, unifyTerm} from "./TermUnification";
 
@@ -21,6 +21,7 @@ import {
 } from "reactstrap";
 import {isConstructor} from "./Terms";
 import {precedence} from "./Precedence";
+import {applySubst} from "./Substitution";
 
 class App extends Component {
 
@@ -234,12 +235,16 @@ class App extends Component {
         let result = this.state.result;
         if (result !== undefined) {
             if (result.status === "success") {
-                return (<Card className="mt-3">
-                    <CardHeader>Substitution</CardHeader>
-                    <CardBody>
-                        {this.renderSubstitution(Object.entries(result.subst))}
-                    </CardBody>
-                </Card>)
+                return (<div>
+                    <Card className="mt-3">
+                        <CardHeader>Substitution</CardHeader>
+                        <CardBody>
+                            {this.renderSubstitution(Object.entries(result.subst))}
+                        </CardBody>
+                    </Card>
+                    <hr/>
+                    {this.renderTruthTable(result.subst)}
+                </div>)
             } else if (result.status === "failure") {
                 return <Alert color="danger" className="mt-3">
                     <h4 className="alert-heading">Unification Failure</h4>
@@ -271,6 +276,35 @@ class App extends Component {
             ))}
             </tbody>
         </Table>
+    }
+
+    renderTruthTable(subst) {
+        let f1 = this.state.lhsParsed.value
+        let f = applySubst(subst, f1)
+        let fvs = freeVars(f)
+        let tt = truthTable(f, fvs)
+
+        return (
+            <Card className="mt-3">
+                <CardHeader>Truth Table</CardHeader>
+                <CardBody>
+                    <Table striped borderless size="sm">
+                        <thead>
+                        <tr>
+                            {fvs.map(f => <th>{f}</th>)}
+                            <th>R</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {tt.map(row => {
+                            return <tr>
+                                {row.map(t => isTrue(t) ? <td>T</td> : <td>F</td>)}
+                            </tr>
+                        })}
+                        </tbody>
+                    </Table>
+                </CardBody>
+            </Card>)
     }
 
     renderFormula(x) {
