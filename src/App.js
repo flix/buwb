@@ -15,12 +15,11 @@
  */
 import React, {Component} from 'react';
 import './App.css';
-import {isTrue, truthTable, freeVars} from "./Bools";
+import {truthTable, freeVars} from "./Bools";
 import {parse} from "./Parser";
 import {unifyTerm} from "./TermUnification";
 
 import {
-    Alert,
     Card,
     CardHeader,
     CardBody,
@@ -31,15 +30,14 @@ import {
     FormGroup,
     FormFeedback,
     Input,
-    Row,
-    Table
+    Row
 } from "reactstrap";
 import {applySubst} from "./Substitution";
 import Header from "./components/Header";
 import Summary from "./components/Summary";
 import Substitution from "./components/Substitution";
 import TruthTable from "./components/TruthTable";
-import UnificationFailure from "./components/Failure";
+import UnificationFailure from "./components/UnificationFailure";
 
 class App extends Component {
 
