@@ -39,6 +39,7 @@ import Header from "./components/Header";
 import Summary from "./components/Summary";
 import Substitution from "./components/Substitution";
 import TruthTable from "./components/TruthTable";
+import UnificationFailure from "./components/Failure";
 
 class App extends Component {
 
@@ -268,10 +269,8 @@ class App extends Component {
         let result = this.state.result;
         if (result !== undefined) {
             if (result.status === "success") {
-
                 let fvs = this.state.result.freeVars
                 let tt = this.state.result.truthTable
-
                 return (<Row>
                     <Summary truthTable={result.truthTable}/>
                     <Substitution subst={Object.entries(result.subst)}
@@ -283,13 +282,7 @@ class App extends Component {
                     {this.state.showTruthTable ? <TruthTable freeVars={fvs} truthTable={tt}/> : []}
                 </Row>)
             } else if (result.status === "failure") {
-                return <Alert color="danger" className="mt-3">
-                    <h4 className="alert-heading">Unification Failure</h4>
-                    <hr/>
-                    <p className="mb-0">
-                        {result.reason}
-                    </p>
-                </Alert>
+                return <UnificationFailure reason={result.reason}/>
             } else {
                 throw new Error(`Illegal value of status: ${result.status}`)
             }
