@@ -1,3 +1,18 @@
+/*
+ *  Copyright 2021 Magnus Madsen
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 import {FALSE, isAnd, isFalse, isNot, isOr, isTrue, isVar, mkAnd, mkNot, mkOr, mkVar, TRUE} from "./Bools";
 import {isConstructor, mkConstructor} from "./Terms";
 
@@ -12,17 +27,19 @@ export function applySubst(subst, term) {
         throw new Error(`Illegal argument 'term': ${term}.`)
     }
 
-    if (isConstructor(term)) {
-        return mkConstructor(term.name, term.ts.map(t => applySubst(subst, t)))
-    } else if (isTrue(term)) {
-        return TRUE
-    } else if (isFalse(term)) {
-        return FALSE
-    } else if (isVar(term)) {
+    if (isVar(term)) {
         if (subst[term.name] !== undefined)
             return subst[term.name]
         else
             return mkVar(term.name)
+    } else if (isTrue(term)) {
+        return TRUE
+    } else if (isFalse(term)) {
+        return FALSE
+    } else if (isConstructor(term)) {
+        let name = term.name;
+        let terms = term.ts.map(t => applySubst(subst, t));
+        return mkConstructor(name, terms)
     } else if (isNot(term)) {
         return mkNot(applySubst(subst, term.f))
     } else if (isAnd(term)) {
