@@ -305,6 +305,22 @@ export function truthTable(f, fvs) {
 }
 
 /**
+ * Returns `true` if the given truth table is `true` for all inputs.
+ */
+export function isAllTrue(tt) {
+    if (tt === undefined) throw new Error(`Illegal argument 'tt': ${tt}`)
+    return tt.every(row => isTrue(row[row.length - 1]))
+}
+
+/**
+ * Returns `true` if the given truth table is `false` for all inputs.
+ */
+export function isAllFalse(tt) {
+    if (tt === undefined) throw new Error(`Illegal argument 'tt': ${tt}`)
+    return tt.every(row => isFalse(row[row.length - 1]))
+}
+
+/**
  * Returns the minimized version of the formula `f`.
  */
 export function minBool(f, recurse) {

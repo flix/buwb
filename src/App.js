@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {isTrue, isFalse, isVar, isNot, isAnd, isOr, truthTable, freeVars} from "./Bools";
+import {isTrue, isFalse, isVar, isNot, isAnd, isOr, truthTable, freeVars, isAllTrue, isAllFalse} from "./Bools";
 import {parse} from "./Parser";
 import {minimizeTerm, unifyTerm} from "./TermUnification";
 
@@ -263,6 +263,7 @@ class App extends Component {
         if (result !== undefined) {
             if (result.status === "success") {
                 return (<div>
+                    {this.renderSummary()}
                     <Card className="mt-3">
                         <CardHeader>Substitution</CardHeader>
                         <CardBody>
@@ -302,6 +303,22 @@ class App extends Component {
             ))}
             </tbody>
         </Table>
+    }
+
+    renderSummary() {
+        let tt = this.state.result.truthTable
+        console.log(tt)
+        if (isAllTrue(tt)) {
+            return <Alert color="success" fade={false} className="mt-3">
+                <b>Note:</b> The unifiers reduce to TRUE, i.e. applying the mgu to both formulas reduce them to TRUE.
+            </Alert>
+        } else if (isAllFalse(tt)) {
+            return <Alert color="success" fade={false}  className="mt-3">
+                <b>Note:</b> The unifiers reduce to FALSE, i.e. applying the mgu to both formulas reduce them to FALSE.
+            </Alert>
+        } else {
+            return undefined
+        }
     }
 
     renderTruthTable() {
