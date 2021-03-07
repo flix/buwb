@@ -303,7 +303,7 @@ class App extends Component {
             <Card className="mt-3">
                 <CardHeader>Truth Table</CardHeader>
                 <CardBody>
-                    <Table striped borderless size="sm">
+                    <Table borderless size="sm">
                         <thead>
                         <tr>
                             {fvs.map(f => <th>{f}</th>)}
@@ -312,7 +312,8 @@ class App extends Component {
                         </thead>
                         <tbody>
                         {tt.map(row => {
-                            return <tr>
+                            let className = isTrue(row[row.length - 1]) ? "table-active" : ""
+                            return <tr className={className}>
                                 {row.map(t => isTrue(t) ? <td>T</td> : <td>F</td>)}
                             </tr>
                         })}
