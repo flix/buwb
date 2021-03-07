@@ -1,22 +1,39 @@
-import {isBool, minBool} from "./Bools";
-import {isConstructor, mkConstructor} from "./Terms";
+import {isBool, minBool, showBool} from "./Bools";
 import {boolUnify} from "./BoolUnification";
 import {applySubst, mergeSubst} from "./Substitution";
+import {isConstructor, mkConstructor, showTerm} from "./Terms";
 
 /**
- * Returns a substitution that unifies p and q (if it exists).
+ * Returns a substitution that unifies x and y (if it exists).
  */
-export function unifyTerms(x, y) {
-    if (isBool(x) && isBool(y)) {
-        return boolUnify(x, y)
-    } else if (isConstructor(x) && isConstructor(y)) {
-        if (x.name === y.name) {
-            return unifyTermLists(x.ts, y.ts)
+export function unifyTerm(t1, t2) {
+    if (t1 === undefined) {
+        throw new Error(`Illegal argument 't1': ${t1}.`)
+    }
+    if (t2 === undefined) {
+        throw new Error(`Illegal argument 't2': ${t2}.`)
+    }
+
+    if (isBool(t1) && isBool(t2)) {
+        return boolUnify(t1, t2)
+    } else if (isConstructor(t1) && isConstructor(t2)) {
+        if (t1.name === t2.name) {
+            return unifyTermLists(t1.ts, t2.ts)
         } else {
-            return {status: "failure", reason: `Mismatched constructor names: ${x.name} and ${y.name}.`}
+            return {status: "failure", reason: `Mismatched constructors: ${t1.name} and ${t2.name}.`}
+        }
+    } else if (isBool(t1) && isConstructor(t2)) {
+        return {
+            status: "failure",
+            reason: `Mismatched kinds: Bool: ${showBool(t1)} and Constructor: ${showTerm(t2)}.`
+        }
+    } else if (isConstructor(t1) && isBool(t2)) {
+        return {
+            status: "failure",
+            reason: `Mismatched kinds: Constructor: ${showTerm(t1)} and Bool: ${showBool(t2)}.`
         }
     } else {
-        return {status: "failure", reason: `Mismatched kinds: ${JSON.stringify(x)} and ${JSON.stringify(y)}.`}
+        throw new Error(`Illegal arguments 't1': ${t1} and 't2': ${t2}.`)
     }
 }
 
@@ -32,7 +49,7 @@ function unifyTermLists(l1, l2) {
     }
 
     if (l1.length !== l2.length) {
-        return {status: "failure", reason: `Mismatched constructor arity.`}
+        return {status: "failure", reason: `Mismatched constructor arity: ${l1.length} vs. ${l2.length}.`}
     }
 
     if (l1.length === 0) {
@@ -44,7 +61,7 @@ function unifyTermLists(l1, l2) {
         let [y, ...ys] = l2
 
         // Unify x and y.
-        let result = unifyTerms(x, y)
+        let result = unifyTerm(x, y)
         if (result.status !== "success") {
             // Failed. Return immediately.
             return result
@@ -73,17 +90,23 @@ function unifyTermLists(l1, l2) {
 }
 
 /**
- * Return a minimized term.
+ * Returns a minimized version of the given `term`.
+ *
+ * Minimizes recursively if `recurse` is true.
  */
-export function minTerm(x, recursively) {
-    if (typeof recursively !== "boolean") {
-        throw new Error(`Illegal argument recursively: ${recursively}.`)
+export function minimizeTerm(term, recurse) {
+    if (term === undefined) {
+        throw new Error(`Illegal argument 't': ${term}.`)
     }
-    if (isBool(x)) {
-        return minBool(x, recursively)
-    } else if (isConstructor(x)) {
-        return mkConstructor(x.name, x.ts.map(t => minTerm(t, recursively)))
+    if (typeof recurse !== "boolean") {
+        throw new Error(`Illegal argument 'recurse': ${recurse}.`)
+    }
+
+    if (isConstructor(term)) {
+        return mkConstructor(term.name, term.ts.map(t => minimizeTerm(t, recurse)))
+    } else if (isBool(term)) {
+        return minBool(term, recurse)
     } else {
-        throw new Error(`Illegal argument x: ${x}.`)
+        throw new Error(`Illegal argument 'term': ${term}.`)
     }
 }

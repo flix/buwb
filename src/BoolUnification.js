@@ -1,4 +1,4 @@
-import {FALSE, freeVars, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, show, TRUE} from "./Bools.js";
+import {FALSE, freeVars, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, showBool, TRUE} from "./Bools.js";
 import {applySubst} from "./Substitution";
 
 /**
@@ -16,7 +16,7 @@ export function boolUnify(p, q) {
         return {status: "success", subst: subst}
     } catch (e) {
         if (e instanceof SVEError) {
-            return {status: "failure", reason: `Cannot unify: ${show(p)} and ${show(q)}`}
+            return {status: "failure", reason: `Cannot unify: ${showBool(p)} and ${showBool(q)}`}
         } else {
             throw e
         }

@@ -1,3 +1,5 @@
+import {showBool} from "./Bools";
+
 /**
  * Returns `true` if the given `x` is a constructor.
  */
@@ -17,4 +19,15 @@ export function mkConstructor(n, ts) {
     }
 
     return {type: 'CONST', name: n, ts: ts}
+}
+
+/**
+ * Returns a human readable representation of the given term.
+ */
+export function showTerm(x) {
+    if (isConstructor(x)) {
+        return `${x.name}(${x.ts.map(t => showTerm(t)).join(", ")})`
+    } else {
+        return showBool(x)
+    }
 }

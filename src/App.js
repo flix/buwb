@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import './App.css';
 import {isTrue, isFalse, isVar, isNot, isAnd, isOr, precedence} from "./Bools";
 import {parse} from "./Parser";
-import {minTerm, unifyTerms} from "./TermUnification";
+import {minimizeTerm, unifyTerm} from "./TermUnification";
 
 import {
     Alert,
@@ -68,7 +68,7 @@ class App extends Component {
     }
 
     solve(x, y) {
-        let result = unifyTerms(x, y)
+        let result = unifyTerm(x, y)
         this.setState({result: result})
     }
 
@@ -273,7 +273,7 @@ class App extends Component {
 
     renderFormula(x) {
         if (this.state.minimize) {
-            return this.renderTerm(minTerm(x, this.state.minimizeSubFormulas))
+            return this.renderTerm(minimizeTerm(x, this.state.minimizeSubFormulas))
         } else {
             return this.renderTerm(x)
         }

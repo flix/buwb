@@ -141,7 +141,7 @@ export function mkOr(x, y) {
 /**
  * Returns a human readable representation of the given formula.
  */
-export function show(x) {
+export function showBool(x) {
     if (isTrue(x)) {
         return "true"
     } else if (isFalse(x)) {
@@ -149,11 +149,11 @@ export function show(x) {
     } else if (isVar(x)) {
         return x.name;
     } else if (isNot(x)) {
-        return `¬ (${show(x.f)})`
+        return `¬ (${showBool(x.f)})`
     } else if (isAnd(x)) {
-        return `(${show(x.f1)}) ∧ (${show(x.f2)})`
+        return `(${showBool(x.f1)}) ∧ (${showBool(x.f2)})`
     } else if (isOr(x)) {
-        return `(${show(x.f1)}) ∨ (${show(x.f2)})`
+        return `(${showBool(x.f1)}) ∨ (${showBool(x.f2)})`
     } else {
         throw Error(`Unexpected argument: ${x}.`)
     }
