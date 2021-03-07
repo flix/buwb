@@ -62,14 +62,14 @@ class FormInput extends Component {
     }
 
     render() {
-        let formatInput = this.props.formatInput
+        let reformat = this.props.reformat
         let logicSymbols = this.props.logicSymbols
         let minimize = this.props.minimize
         let minimizeSubFormulas = this.props.minimizeSubFormulas
         let showTruthTable = this.props.showTruthTable
         let parenthesize = this.props.parenthesize
 
-        let toggleFormatInput = this.props.toggleFormatInput
+        let toggleReformat = this.props.toggleReformat
         let toggleLogicSymbols = this.props.toggleLogicSymbols
         let toggleMinimize = this.props.toggleMinimize
         let toggleMinimizeSubFormulas = this.props.toggleMinimizeSubFormulas
@@ -97,8 +97,8 @@ class FormInput extends Component {
                             <Row form>
                                 <CustomInput id="reformat" type="checkbox"
                                              label="Reformat as you type"
-                                             checked={formatInput}
-                                             onChange={toggleFormatInput}
+                                             checked={reformat}
+                                             onChange={toggleReformat}
                                              inline/>
 
                                 <CustomInput id="logicsymbols" type="checkbox"
@@ -182,7 +182,7 @@ class FormInput extends Component {
     }
 
     format(x) {
-        if (!this.props.formatInput) {
+        if (!this.props.reformat) {
             return x
         }
 

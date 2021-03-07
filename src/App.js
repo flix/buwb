@@ -15,7 +15,7 @@
  */
 import React, {Component} from 'react';
 import './App.css';
-import {Container, Row} from "reactstrap";
+import {Container} from "reactstrap";
 
 import Header from "./components/Header";
 import Summary from "./components/Summary";
@@ -34,7 +34,7 @@ class App extends Component {
         super(props);
         this.state = {
             result: undefined,
-            formatInput: true,
+            reformat: true,
             logicSymbols: true,
             minimize: true,
             minimizeSubFormulas: true,
@@ -65,8 +65,8 @@ class App extends Component {
         this.setState({result: undefined})
     }
 
-    toggleFormatInput() {
-        this.setState({formatInput: !this.state.formatInput})
+    toggleReformat() {
+        this.setState({reformat: !this.state.reformat})
     }
 
     toggleLogicSymbols() {
@@ -101,8 +101,8 @@ class App extends Component {
                 <Header/>
 
                 <FormInput
-                    formatInput={this.state.formatInput}
-                    toggleFormatInput={this.toggleFormatInput.bind(this)}
+                    reformat={this.state.reformat}
+                    toggleReformat={this.toggleReformat.bind(this)}
 
                     logicSymbols={this.state.logicSymbols}
                     toggleLogicSymbols={this.toggleLogicSymbols.bind(this)}
