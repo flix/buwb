@@ -52,6 +52,7 @@ class App extends Component {
                 this.solve(parseResult, this.state.rhsParsed.value)
             }
         } catch (e) {
+            console.log(e)
             this.setState({result: undefined, lhsParsed: {valid: false, error: e.toString()}})
         }
     }
@@ -66,6 +67,7 @@ class App extends Component {
                 this.solve(this.state.lhsParsed.value, parseResult)
             }
         } catch (e) {
+            console.log(e)
             this.setState({result: undefined, rhsParsed: {valid: false, error: e.toString()}})
         }
     }
@@ -73,11 +75,14 @@ class App extends Component {
     solve(x, y) {
         let result = unifyTerm(x, y)
         if (result.status === "success") {
-            // Compute the truth table. (It does not matter if we use the lhs or rhs).
-            let lhs = this.state.lhsParsed.value;
-            let rhs = this.state.lhsParsed.value;
-            let f = applySubst(result.subst, lhs)
-            let fvs = freeVars(lhs).concat(freeVars(rhs))
+            // Compute the free variables in the input lhs and rhs.
+            let vars = new Set()
+            freeVars(x).forEach(v => vars.add(v))
+            freeVars(y).forEach(v => vars.add(v))
+            let fvs = [...vars].sort()
+
+            // Compute the truth table. (It does not matter if we use x or y).
+            let f = applySubst(result.subst, x)
             let tt = truthTable(f, fvs)
             this.setState({result: {freeVars: fvs, truthTable: tt, ...result}})
         } else {
