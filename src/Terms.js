@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import {isBool, showBool} from "./Bools";
+import {freeVars, isBool, showBool} from "./Bools";
 
 /**
  * Returns `true` if the given `x` is a constructor.
@@ -53,6 +53,23 @@ export function showTerm(term) {
         } else {
             return `${term.name}(${terms})`
         }
+    } else {
+        throw new Error(`Illegal argument 'term': ${term}.`)
+    }
+}
+
+/**
+ * Returns all the free variables in the given term.
+ */
+export function termFreeVars(term) {
+    if (term === undefined) {
+        throw new Error(`Illegal argument 'term': ${term}.`)
+    }
+
+    if (isBool(term)) {
+        return freeVars(term)
+    } else if (isConstructor(term)) {
+        return term.ts.map(t => termFreeVars(t)).flat()
     } else {
         throw new Error(`Illegal argument 'term': ${term}.`)
     }

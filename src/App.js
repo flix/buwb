@@ -44,8 +44,13 @@ class App extends Component {
     }
 
     notifySolve(x, y) {
+        console.log("x = ", x)
+        console.log("y = ", y)
+
         let result = unifyTerm(x, y)
         if (result.status === "success") {
+            // TODO: Computing the truthtable is only applicable if there is ONE formula.
+
             // Compute the free variables in the input lhs and rhs.
             let vars = new Set()
             freeVars(x).forEach(v => vars.add(v))
@@ -113,7 +118,7 @@ class App extends Component {
                     minimizeSubFormulas={this.state.minimizeSubFormulas}
                     toggleMinimizeSubFormulas={this.toggleMinimizeSubFormulas.bind(this)}
 
-                    showTruthTable={this.state.truthTable}
+                    truthTable={this.state.truthTable}
                     toggleTruthTable={this.toggleTruthTable.bind(this)}
 
                     parenthesize={this.state.parenthesize}
@@ -141,7 +146,7 @@ class App extends Component {
                                   minimizeSubFormulas={this.state.minimizeSubFormulas}
                                   parenthesize={this.state.parenthesize}/>
 
-                    {this.state.showTruthTable ? <TruthTable freeVars={fvs} truthTable={tt}/> : []}
+                    {this.state.truthTable ? <TruthTable freeVars={fvs} truthTable={tt}/> : []}
                 </div>)
             } else if (result.status === "failure") {
                 return <UnificationFailure reason={result.reason}/>

@@ -66,7 +66,7 @@ class FormInput extends Component {
         let logicSymbols = this.props.logicSymbols
         let minimize = this.props.minimize
         let minimizeSubFormulas = this.props.minimizeSubFormulas
-        let showTruthTable = this.props.showTruthTable
+        let truthTable = this.props.truthTable
         let parenthesize = this.props.parenthesize
 
         let toggleReformat = this.props.toggleReformat
@@ -101,7 +101,7 @@ class FormInput extends Component {
                                              onChange={toggleReformat}
                                              inline/>
 
-                                <CustomInput id="logicsymbols" type="checkbox"
+                                <CustomInput id="logicSymbols" type="checkbox"
                                              label="Use logic symbols"
                                              checked={logicSymbols}
                                              onChange={toggleLogicSymbols}
@@ -123,9 +123,9 @@ class FormInput extends Component {
                                              inline
                                 />
 
-                                <CustomInput id="showTruthTable" type="checkbox"
+                                <CustomInput id="truthTable" type="checkbox"
                                              label="Show truth table"
-                                             checked={showTruthTable}
+                                             checked={truthTable}
                                              onChange={toggleTruthTable}
                                              inline
                                 />
@@ -147,14 +147,14 @@ class FormInput extends Component {
     renderLHSInput() {
         if (this.state.lhsInput === "" || this.state.lhsParsed.valid) {
             return <FormGroup>
-                <Input id="lhs" type="text" bsSize="lg" autoFocus autoComplete="off"
+                <Input id="lhs" type="text" bsSize="lg" autoFocus autoComplete="off" spellCheck="off"
                        value={this.state.lhsInput}
                        onChange={this.notifyLHS.bind(this)}
                 />
             </FormGroup>
         } else {
             return <FormGroup>
-                <Input id="lhs" type="text" bsSize="lg" autoComplete="off"
+                <Input id="lhs" type="text" bsSize="lg" autoComplete="off" spellCheck="off"
                        value={this.state.lhsInput}
                        onChange={this.notifyLHS.bind(this)}
                        invalid={true}/>
@@ -166,13 +166,13 @@ class FormInput extends Component {
     renderRHSInput() {
         if (this.state.rhsInput === "" || this.state.rhsParsed.valid) {
             return <FormGroup>
-                <Input id="lhs" type="text" bsSize="lg" autoComplete="off"
+                <Input id="rhs" type="text" bsSize="lg" autoComplete="off" spellCheck="off"
                        value={this.state.rhsInput}
                        onChange={this.notifyRHS.bind(this)}/>
             </FormGroup>
         } else {
             return <FormGroup>
-                <Input id="lhs" type="text" bsSize="lg" autoComplete="off"
+                <Input id="rhs" type="text" bsSize="lg" autoComplete="off" spellCheck="off"
                        value={this.state.rhsInput}
                        onChange={this.notifyRHS.bind(this)}
                        invalid/>

@@ -39,7 +39,7 @@ class TruthTable extends Component {
                             {tt.map(row => {
                                 let className = isTrue(row[row.length - 1]) ? "table-active" : ""
                                 return <tr className={className}>
-                                    {row.map(t => isTrue(t) ? <td>T</td> : <td>F</td>)}
+                                    {row.map((t, index) => isTrue(t) ? <td key={index}>T</td> : <td key={index}>F</td>)}
                                 </tr>
                             })}
                             </tbody>

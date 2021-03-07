@@ -35,7 +35,7 @@ class Substitution extends Component {
                         <Table>
                             <thead>
                             <tr>
-                                <th>Variable</th>
+                                <th style={{width:"6rem"}}>Variable</th>
                                 <th>Formula</th>
                             </tr>
                             </thead>
