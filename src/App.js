@@ -72,7 +72,15 @@ class App extends Component {
 
     solve(x, y) {
         let result = unifyTerm(x, y)
-        this.setState({result: result})
+        if (result.status === "success") {
+            // Compute the truth table. (It does not matter if we use the lhs or rhs).
+            let f = applySubst(result.subst, this.state.lhsParsed.value)
+            let fvs = freeVars(f)
+            let tt = truthTable(f, fvs)
+            this.setState({result: {freeVars: fvs, truthTable: tt, ...result}})
+        } else {
+            this.setState({result: result})
+        }
     }
 
     format(x) {
@@ -254,7 +262,7 @@ class App extends Component {
                             {this.renderSubstitution(Object.entries(result.subst))}
                         </CardBody>
                     </Card>
-                    {this.renderTruthTable(result.subst)}
+                    {this.renderTruthTable()}
                 </div>)
             } else if (result.status === "failure") {
                 return <Alert color="danger" className="mt-3">
@@ -289,15 +297,13 @@ class App extends Component {
         </Table>
     }
 
-    renderTruthTable(subst) {
+    renderTruthTable() {
         if (!this.state.showTruthTable) {
             return undefined
         }
 
-        let f1 = this.state.lhsParsed.value
-        let f = applySubst(subst, f1)
-        let fvs = freeVars(f)
-        let tt = truthTable(f, fvs)
+        let fvs = this.state.result.freeVars
+        let tt = this.state.result.truthTable
 
         return (
             <Card className="mt-3">
