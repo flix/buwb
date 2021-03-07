@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {isTrue, isFalse, isVar, isNot, isAnd, isOr, truthTable, freeVars, isAllTrue, isAllFalse} from "./Bools";
+import {isTrue, truthTable, freeVars, isAllTrue, isAllFalse} from "./Bools";
 import {parse} from "./Parser";
 import {minimizeTerm, unifyTerm} from "./TermUnification";
 
@@ -19,10 +19,9 @@ import {
     Row,
     Table
 } from "reactstrap";
-import {isConstructor} from "./Terms";
-import {precedence} from "./Precedence";
 import {applySubst} from "./Substitution";
 import Header from "./components/Header";
+import Term from "./components/Term";
 
 class App extends Component {
 
@@ -141,68 +140,68 @@ class App extends Component {
 
                 <Row>
 
-                <Card>
-                    <CardHeader>Enter two Boolean formulas to compute their most-general unifier (mgu)</CardHeader>
-                    <CardBody>
-                        <Form>
-                            <Row form>
-                                <Col md={5}>
-                                    {this.renderLHSInput()}
-                                </Col>
-                                <Col md={2}>
-                                    <p className="qeq">=</p>
-                                </Col>
-                                <Col md={5}>
-                                    {this.renderRHSInput()}
-                                </Col>
-                            </Row>
+                    <Card>
+                        <CardHeader>Enter two Boolean formulas to compute their most-general unifier (mgu)</CardHeader>
+                        <CardBody>
+                            <Form>
+                                <Row form>
+                                    <Col md={5}>
+                                        {this.renderLHSInput()}
+                                    </Col>
+                                    <Col md={2}>
+                                        <p className="qeq">=</p>
+                                    </Col>
+                                    <Col md={5}>
+                                        {this.renderRHSInput()}
+                                    </Col>
+                                </Row>
 
-                            <Row form>
-                                <CustomInput id="reformat" type="checkbox"
-                                             label="Reformat as you type"
-                                             checked={this.state.formatInput}
-                                             onChange={this.toggleFormatInput.bind(this)}
-                                             inline/>
+                                <Row form>
+                                    <CustomInput id="reformat" type="checkbox"
+                                                 label="Reformat as you type"
+                                                 checked={this.state.formatInput}
+                                                 onChange={this.toggleFormatInput.bind(this)}
+                                                 inline/>
 
-                                <CustomInput id="logicsymbols" type="checkbox"
-                                             label="Use logic symbols"
-                                             checked={this.state.logicSymbols}
-                                             onChange={this.toggleLogicSymbols.bind(this)}
-                                             inline
-                                />
+                                    <CustomInput id="logicsymbols" type="checkbox"
+                                                 label="Use logic symbols"
+                                                 checked={this.state.logicSymbols}
+                                                 onChange={this.toggleLogicSymbols.bind(this)}
+                                                 inline
+                                    />
 
-                                <CustomInput id="minimize" type="checkbox"
-                                             label="Minimize formulas"
-                                             checked={this.state.minimize}
-                                             onChange={this.toggleMinimize.bind(this)}
-                                             inline
-                                />
+                                    <CustomInput id="minimize" type="checkbox"
+                                                 label="Minimize formulas"
+                                                 checked={this.state.minimize}
+                                                 onChange={this.toggleMinimize.bind(this)}
+                                                 inline
+                                    />
 
-                                <CustomInput id="minimizeSubFormulas" type="checkbox"
-                                             label="Recursively minimize"
-                                             checked={this.state.minimizeSubFormulas}
-                                             disabled={!this.state.minimize}
-                                             onChange={this.toggleMinimizeSubFormulas.bind(this)}
-                                             inline
-                                />
+                                    <CustomInput id="minimizeSubFormulas" type="checkbox"
+                                                 label="Recursively minimize"
+                                                 checked={this.state.minimizeSubFormulas}
+                                                 disabled={!this.state.minimize}
+                                                 onChange={this.toggleMinimizeSubFormulas.bind(this)}
+                                                 inline
+                                    />
 
-                                <CustomInput id="showTruthTable" type="checkbox"
-                                             label="Show truth table"
-                                             checked={this.state.showTruthTable}
-                                             onChange={this.toggleShowTruthTable.bind(this)}
-                                             inline
-                                />
+                                    <CustomInput id="showTruthTable" type="checkbox"
+                                                 label="Show truth table"
+                                                 checked={this.state.showTruthTable}
+                                                 onChange={this.toggleShowTruthTable.bind(this)}
+                                                 inline
+                                    />
 
-                                <CustomInput id="parenthesize" type="checkbox"
-                                             label="Fully parenthesize"
-                                             checked={this.state.parenthesize}
-                                             onChange={this.toggleParenthesize.bind(this)}
-                                             inline
-                                />
-                            </Row>
-                        </Form>
-                    </CardBody>
-                </Card>
+                                    <CustomInput id="parenthesize" type="checkbox"
+                                                 label="Fully parenthesize"
+                                                 checked={this.state.parenthesize}
+                                                 onChange={this.toggleParenthesize.bind(this)}
+                                                 inline
+                                    />
+                                </Row>
+                            </Form>
+                        </CardBody>
+                    </Card>
 
                 </Row>
 
@@ -288,7 +287,7 @@ class App extends Component {
             {subst.map(([varSym, formula]) => (
                 <tr key={varSym}>
                     <td>{varSym}</td>
-                    <td>{this.renderFormula(formula)}</td>
+                    <td>{this.showTerm(formula)}</td>
                 </tr>
             ))}
             </tbody>
@@ -345,70 +344,16 @@ class App extends Component {
             </Card>)
     }
 
-    renderFormula(x) {
+    showTerm(term) {
         if (this.state.minimize) {
-            return this.renderTerm(minimizeTerm(x, this.state.minimizeSubFormulas))
+            let minTerm = minimizeTerm(term, this.state.minimizeSubFormulas);
+            return <Term term={minTerm} logicSymbols={this.state.logicSymbols} parenthesize={this.state.parenthesize}/>
         } else {
-            return this.renderTerm(x)
+            return <Term term={term} logicSymbols={this.state.logicSymbols} parenthesize={this.state.parenthesize}/>
         }
     }
 
-    renderTerm(t) {
-        let lparen = <span className="lparen">(</span>;
-        let rparen = <span className="rparen">)</span>;
-        let neg = (this.state.logicSymbols) ? "¬" : "not "
-        let conj = (this.state.logicSymbols) ? "∧" : "and"
-        let disj = (this.state.logicSymbols) ? "∨" : "or"
-        let parenthesize = this.state.parenthesize
 
-        function visit(x) {
-            if (isConstructor(x)) {
-                return x.name;
-            } else if (isVar(x)) {
-                return x.name;
-            } else if (isTrue(x)) {
-                return "true"
-            } else if (isFalse(x)) {
-                return "false"
-
-            } else if (isNot(x)) {
-                let withParens = precedence(x.f.type) >= precedence("NOT");
-                if (withParens || parenthesize) {
-                    return <span>{neg}{lparen}{visit(x.f)}{rparen}</span>
-                } else {
-                    return <span>{neg}{visit(x.f)}</span>
-                }
-            } else if (isAnd(x)) {
-                let withLParens = precedence(x.f1.type) >= precedence("AND");
-                let withRParens = precedence(x.f2.type) >= precedence("AND");
-                if ((withLParens && withRParens) || parenthesize) {
-                    return <span>{lparen}{visit(x.f1)}{rparen} {conj} {lparen}{visit(x.f2)}{rparen}</span>
-                } else if (withLParens) {
-                    return <span>{lparen}{visit(x.f1)}{rparen} {conj} {visit(x.f2)}</span>
-                } else if (withRParens) {
-                    return <span>{visit(x.f1)} {conj} {lparen}{visit(x.f2)}{rparen}</span>
-                } else {
-                    return <span>{visit(x.f1)} {conj} {visit(x.f2)}</span>
-                }
-            } else if (isOr(x)) {
-                let withLParens = precedence(x.f1.type) >= precedence("OR");
-                let withRParens = precedence(x.f2.type) >= precedence("OR");
-                if ((withLParens && withRParens) || parenthesize) {
-                    return <span>{lparen}{visit(x.f1)}{rparen} {disj} {lparen}{visit(x.f2)}{rparen}</span>
-                } else if (withLParens) {
-                    return <span>{lparen}{visit(x.f1)}{rparen} {disj} {visit(x.f2)}</span>
-                } else if (withRParens) {
-                    return <span>{visit(x.f1)} {disj} {lparen}{visit(x.f2)}{rparen}</span>
-                } else {
-                    return <span>{visit(x.f1)} {disj} {visit(x.f2)}</span>
-                }
-            } else {
-                throw new Error(`Unexpected argument: ${x}.`)
-            }
-        }
-
-        return visit(t)
-    }
 }
 
 export default App;
