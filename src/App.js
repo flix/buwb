@@ -22,6 +22,7 @@ import {
 import {isConstructor} from "./Terms";
 import {precedence} from "./Precedence";
 import {applySubst} from "./Substitution";
+import Header from "./components/Header";
 
 class App extends Component {
 
@@ -136,22 +137,9 @@ class App extends Component {
         return (
             <Container>
 
-                <h1>Boolean Unification Workbench</h1>
+                <Header/>
 
-                <blockquote>
-                    The earliest work on Boolean unification and the successive variable elimination algorithm
-                    goes back to George Boole himself [Boole 1847]. Later work includes that of Rudeanu [1974]
-                    and Buttnerand Simonis [1987]. Martin and Nipkow [1989] provide an accessible introduction to
-                    Boolean unification, while Boudet et al. [1989] study unification in combinations of theories,
-                    including Boolean rings.
-                </blockquote>
-
-                <blockquote>
-                    <b>The Problem: </b> Given two Boolean formulas x and y, the Boolean Unification Problem x ?= y is
-                    to compute a unifier (solution) i.e. a substitution S such that S(x) ≡ S(y) or to report that no
-                    such substitution
-                    exists.
-                </blockquote>
+                <Row>
 
                 <Card>
                     <CardHeader>Enter two Boolean formulas to compute their most-general unifier (mgu)</CardHeader>
@@ -215,6 +203,8 @@ class App extends Component {
                         </Form>
                     </CardBody>
                 </Card>
+
+                </Row>
 
                 {this.renderResult()}
 
@@ -310,11 +300,13 @@ class App extends Component {
         console.log(tt)
         if (isAllTrue(tt)) {
             return <Alert color="success" fade={false} className="mt-3">
-                <b>Note:</b> The unifiers reduce to TRUE, i.e. applying the mgu (substitution) to both formulas reduce them to TRUE.
+                <b>Note:</b> The unifiers reduce to TRUE, i.e. applying the mgu (substitution) to both formulas reduce
+                them to TRUE.
             </Alert>
         } else if (isAllFalse(tt)) {
-            return <Alert color="success" fade={false}  className="mt-3">
-                <b>Note:</b> The unifiers reduce to FALSE, i.e. applying the mgu (substitution)  to both formulas reduce them to FALSE.
+            return <Alert color="success" fade={false} className="mt-3">
+                <b>Note:</b> The unifiers reduce to FALSE, i.e. applying the mgu (substitution) to both formulas reduce
+                them to FALSE.
             </Alert>
         } else {
             return undefined
