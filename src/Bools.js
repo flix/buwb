@@ -1,3 +1,18 @@
+/*
+ *  Copyright 2021 Magnus Madsen
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 import {applySubst} from "./Substitution.js";
 import {Cache} from "./Cache.js";
 
@@ -54,130 +69,128 @@ export function isOr(f) {
 }
 
 /**
- * Returns `true` if the given `x` is a Boolean formula.
+ * Returns `true` if the given `f` is a Boolean formula.
  */
-export function isBool(x) {
-    return isTrue(x) || isFalse(x) || isNot(x) || isVar(x) || isAnd(x) || isOr(x)
+export function isBool(f) {
+    return isTrue(f) || isFalse(f) || isNot(f) || isVar(f) || isAnd(f) || isOr(f)
 }
 
 /**
- * Returns the variable formula with name `x`.
+ * Returns a variable formula with the given `name`.
  */
-export function mkVar(x) {
-    if (typeof x !== "string") {
-        throw Error(`Unexpected non-string: ${x} of type ${typeof x}.`)
+export function mkVar(name) {
+    if (typeof name !== "string") {
+        throw Error(`Illegal argument 'name': ${name}.`)
     }
 
-    return {type: 'VAR', name: x}
+    return {type: 'VAR', name: name}
 }
 
 /**
- * Returns the negation of the formula `x`.
+ * Returns the negation of the formula `f`.
  */
-export function mkNot(x) {
-    if (x.type === undefined) throw Error(`Illegal argument: ${x}.`)
+export function mkNot(f) {
+    if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
 
-    if (isTrue(x)) {
+    if (isTrue(f)) {
         return FALSE
-    } else if (isFalse(x)) {
+    } else if (isFalse(f)) {
         return TRUE
-    } else if (isNot(x)) {
-        return x.f;
-    } else if (isOr(x)) {
-        // ¬(x ∨ y) => ¬x ∧ ¬y
-        return mkAnd(mkNot(x.f1), mkNot(x.f2))
-    } else if (isAnd(x)) {
-        // ¬(x ∧ y) => ¬x ∨ ¬y
-        return mkOr(mkNot(x.f1), mkNot(x.f2))
+    } else if (isNot(f)) {
+        return f.f;
     } else {
-        return {type: 'NOT', f: x}
+        return {type: 'NOT', f: f}
     }
 }
 
 /**
- * Returns the conjunction of the two formulas `x` and `y`.
+ * Returns the conjunction of the two formulas `f1` and `f2`.
  */
-export function mkAnd(x, y) {
-    if (x.type === undefined) throw Error(`Illegal argument: ${x}.`)
-    if (y.type === undefined) throw Error(`Illegal argument: ${y}.`)
+export function mkAnd(f1, f2) {
+    if (f1 === undefined || !isBool(f1)) throw new Error(`Illegal argument 'f1': ${f1}.`)
+    if (f2 === undefined || !isBool(f2)) throw new Error(`Illegal argument 'f2': ${f2}.`)
 
-    if (isTrue(x)) {
-        return y
-    } else if (isTrue(y)) {
-        return x
-    } else if (isFalse(x)) {
+    if (isTrue(f1)) {
+        return f2
+    } else if (isTrue(f2)) {
+        return f1
+    } else if (isFalse(f1)) {
         return FALSE
-    } else if (isFalse(y)) {
+    } else if (isFalse(f2)) {
         return FALSE
-    } else if (isSyntacticEq(x, y)) {
-        return x
+    } else if (isSyntacticEq(f1, f2)) {
+        return f1
     }
 
-    return {type: 'AND', f1: x, f2: y}
+    return {type: 'AND', f1: f1, f2: f2}
 }
 
 /**
- * Returns the disjunction of the two formulas `x` and `y`.
+ * Returns the disjunction of the two formulas `f1` and `f2`.
  */
-export function mkOr(x, y) {
-    if (x.type === undefined) throw Error(`Illegal argument: ${x}.`)
-    if (y.type === undefined) throw Error(`Illegal argument: ${y}.`)
+export function mkOr(f1, f2) {
+    if (f1 === undefined || !isBool(f1)) throw new Error(`Illegal argument 'f1': ${f1}.`)
+    if (f2 === undefined || !isBool(f2)) throw new Error(`Illegal argument 'f2': ${f2}.`)
 
-    if (isTrue(x)) {
+    if (isTrue(f1)) {
         return TRUE
-    } else if (isTrue(y)) {
+    } else if (isTrue(f2)) {
         return TRUE
-    } else if (isFalse(x)) {
-        return y
-    } else if (isFalse(y)) {
-        return x
-    } else if (isSyntacticEq(x, y)) {
-        return x
+    } else if (isFalse(f1)) {
+        return f2
+    } else if (isFalse(f2)) {
+        return f1
+    } else if (isSyntacticEq(f1, f2)) {
+        return f1
     }
 
-    return {type: 'OR', f1: x, f2: y}
+    return {type: 'OR', f1: f1, f2: f2}
+}
+
+/**
+ * Returns `true` if the Boolean formulas `f1` and `f2` are *syntactically* equal.
+ */
+function isSyntacticEq(f1, f2) {
+    if (f1 === undefined || !isBool(f1)) throw new Error(`Illegal argument 'f1': ${f1}.`)
+    if (f2 === undefined || !isBool(f2)) throw new Error(`Illegal argument 'f2': ${f2}.`)
+
+    if (isTrue(f1) && isTrue(f2)) {
+        return true
+    } else if (isFalse(f1) && isFalse(f2)) {
+        return true
+    } else if (isVar(f1) && isVar(f2)) {
+        return f1.name === f2.name
+    } else if (isNot(f1) && isNot(f2)) {
+        return isSyntacticEq(f1.f, f2.f)
+    } else if (isAnd(f1) && isAnd(f2)) {
+        return isSyntacticEq(f1.f1, f2.f1) && isSyntacticEq(f1.f2, f2.f2)
+    } else if (isOr(f1) && isOr(f2)) {
+        return isSyntacticEq(f1.f1, f2.f1) && isSyntacticEq(f1.f2, f2.f2)
+    } else {
+        return false
+    }
 }
 
 /**
  * Returns a human readable representation of the given formula.
  */
-export function showBool(x) {
-    if (isTrue(x)) {
-        return "true"
-    } else if (isFalse(x)) {
-        return "false"
-    } else if (isVar(x)) {
-        return x.name;
-    } else if (isNot(x)) {
-        return `¬ (${showBool(x.f)})`
-    } else if (isAnd(x)) {
-        return `(${showBool(x.f1)}) ∧ (${showBool(x.f2)})`
-    } else if (isOr(x)) {
-        return `(${showBool(x.f1)}) ∨ (${showBool(x.f2)})`
-    } else {
-        throw Error(`Unexpected argument: ${x}.`)
-    }
-}
+export function showBool(f) {
+    if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
 
-/**
- * Returns the precedence of the given connective `x`.
- */
-export function precedence(x) {
-    switch (x) {
-        case "VAR":
-            return 0
-        case "TRUE":
-            return 0
-        case "FALSE":
-            return 0
-        case "NOT":
-            return 1
-        case "AND":
-            return 2
-        case "OR":
-            return 2
-        default:
-            throw Error(`Unexpected argument: ${x}.`)
+    if (isTrue(f)) {
+        return "true"
+    } else if (isFalse(f)) {
+        return "false"
+    } else if (isVar(f)) {
+        return f.name;
+    } else if (isNot(f)) {
+        return `¬(${showBool(f.f)})`
+    } else if (isAnd(f)) {
+        return `(${showBool(f.f1)}) ∧ (${showBool(f.f2)})`
+    } else if (isOr(f)) {
+        return `(${showBool(f.f1)}) ∨ (${showBool(f.f2)})`
+    } else {
+        throw Error(`Unexpected argument 'f': ${f}.`)
     }
 }
 
@@ -421,26 +434,3 @@ function lookup(x) {
     }
 }
 
-/**
- * Returns `true` if `x` and `y` are syntactically equal.
- */
-export function isSyntacticEq(x, y) {
-    if (x === undefined || x.type === undefined) throw Error(`Illegal argument: ${x}.`)
-    if (y === undefined || y.type === undefined) throw Error(`Illegal argument: ${y}.`)
-
-    if (isTrue(x) && isTrue(y)) {
-        return true
-    } else if (isFalse(x) && isFalse(y)) {
-        return true
-    } else if (isVar(x) && isVar(y)) {
-        return x.name === y.name
-    } else if (isNot(x) && isNot(y)) {
-        return isSyntacticEq(x.f, y.f)
-    } else if (isAnd(x) && isAnd(y)) {
-        return isSyntacticEq(x.f1, y.f1) && isSyntacticEq(x.f2, y.f2)
-    } else if (isOr(x) && isOr(y)) {
-        return isSyntacticEq(x.f1, y.f1) && isSyntacticEq(x.f2, y.f2)
-    } else {
-        return false
-    }
-}

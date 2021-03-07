@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {isTrue, isFalse, isVar, isNot, isAnd, isOr, precedence} from "./Bools";
+import {isTrue, isFalse, isVar, isNot, isAnd, isOr} from "./Bools";
 import {parse} from "./Parser";
 import {minimizeTerm, unifyTerm} from "./TermUnification";
 
@@ -20,6 +20,7 @@ import {
     Table
 } from "reactstrap";
 import {isConstructor} from "./Terms";
+import {precedence} from "./Precedence";
 
 class App extends Component {
 
