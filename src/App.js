@@ -46,13 +46,21 @@ class App extends Component {
     }
 
     notifySolve(x, y) {
+        // Log the two formulas to be solved.
+        console.log("Solve x = ", x)
+        console.log("Solve y = ", y)
+
         // Compute the mgu.
         let result = unifyTerm(x, y)
 
         // Check if it exists.
         if (result.status === "success") {
             // Compute the free variables in the x and y.
-            let fvs = [...termFreeVars(x), ...termFreeVars(y)].sort()
+            // Note must compute a set here.
+            let s = new Set()
+            termFreeVars(x).forEach(v => s.add(v))
+            termFreeVars(y).forEach(v => s.add(v))
+            let fvs = [...s].sort()
 
             // Compute the truth table. (It does not matter if we use x or y).
             let f = applySubst(result.subst, x)

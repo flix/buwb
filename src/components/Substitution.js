@@ -52,8 +52,8 @@ class Substitution extends Component {
                         <p className="small text-secondary" style={{"marginBottom": "0.2rem"}}>
                             <b>Note:</b> The solution to the Boolean Unification Problem is not always unique. We
                             compute <i>a</i> most general unifier (mgu) but there may be (infinitely) many other most
-                            general unifiers. However, if there are, they are all most equi-most general
-                            (each can be obtained as an instance of the other, and vise versa).
+                            general unifiers. However, if there are, they are all equi-most general (each can be
+                            obtained as an instance of the other, and vise versa).
                         </p>
                     </CardBody>
                 </Card>
