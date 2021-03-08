@@ -15,6 +15,7 @@
  */
 import {applySubst} from "./Substitution.js";
 import {Cache} from "./Cache.js";
+import {precedence} from "./Precedence";
 
 /**
  * The TRUE constant.
@@ -184,11 +185,33 @@ export function showBool(f) {
     } else if (isVar(f)) {
         return f.name;
     } else if (isNot(f)) {
-        return `¬(${showBool(f.f)})`
+        let withParens = precedence(f.f.type) >= precedence("NOT")
+        if (withParens)
+            return `¬${showBool(f.f)}`
+        else
+            return `¬(${showBool(f.f)})`
     } else if (isAnd(f)) {
-        return `(${showBool(f.f1)}) ∧ (${showBool(f.f2)})`
+        let withLParens = precedence(f.f1.type) >= precedence("AND");
+        let withRParens = precedence(f.f2.type) >= precedence("AND");
+        if (withLParens && withRParens)
+            return `(${showBool(f.f1)}) ∧ (${showBool(f.f2)})`
+        else if (withLParens)
+            return `(${showBool(f.f1)}) ∧ ${showBool(f.f2)}`
+        else if (withRParens)
+            return `${showBool(f.f1)} ∧ (${showBool(f.f2)})`
+        else
+            return `${showBool(f.f1)} ∧ ${showBool(f.f2)}`
     } else if (isOr(f)) {
-        return `(${showBool(f.f1)}) ∨ (${showBool(f.f2)})`
+        let withLParens = precedence(f.f1.type) >= precedence("OR");
+        let withRParens = precedence(f.f2.type) >= precedence("OR");
+        if (withLParens && withRParens)
+            return `(${showBool(f.f1)}) ∨ (${showBool(f.f2)})`
+        else if (withLParens)
+            return `(${showBool(f.f1)}) ∨ ${showBool(f.f2)}`
+        else if (withRParens)
+            return `${showBool(f.f1)} ∨ (${showBool(f.f2)})`
+        else
+            return `${showBool(f.f1)} ∨ ${showBool(f.f2)}`
     } else {
         throw new Error(`Unexpected argument 'f': ${f}.`)
     }
