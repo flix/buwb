@@ -28,6 +28,7 @@ import {truthTable} from "./Bools";
 import {unifyTerm} from "./TermUnification";
 import {applySubst} from "./Substitution";
 import {termFreeVars} from "./Terms";
+import Footer from "./components/Footer";
 
 class App extends Component {
 
@@ -45,13 +46,13 @@ class App extends Component {
     }
 
     notifySolve(x, y) {
+        // Compute the mgu.
         let result = unifyTerm(x, y)
+
+        // Check if it exists.
         if (result.status === "success") {
-            // Compute the free variables in the input lhs and rhs.
-            let vars = new Set()
-            termFreeVars(x).forEach(v => vars.add(v))
-            termFreeVars(y).forEach(v => vars.add(v))
-            let fvs = [...vars].sort()
+            // Compute the free variables in the x and y.
+            let fvs = [...termFreeVars(x), ...termFreeVars(y)].sort()
 
             // Compute the truth table. (It does not matter if we use x or y).
             let f = applySubst(result.subst, x)
@@ -125,6 +126,8 @@ class App extends Component {
                 />
 
                 {this.renderResult()}
+
+                <Footer/>
             </Container>);
     }
 
