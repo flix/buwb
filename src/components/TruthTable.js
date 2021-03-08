@@ -32,7 +32,7 @@ class TruthTable extends Component {
                         <Table borderless size="sm">
                             <thead>
                             <tr>
-                                {fvs.map(f => <th>{f}</th>)}
+                                {fvs.map((f, key) => <th key={key}>{f}</th>)}
                                 <th>R</th>
                             </tr>
                             </thead>
