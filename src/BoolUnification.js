@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import {FALSE, freeVars, isBool, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, showBool, TRUE} from "./Bools.js";
+import {FALSE, boolFreeVars, isBool, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, showBool, TRUE} from "./Bools.js";
 import {applySubst} from "./Substitution";
 
 /**
@@ -31,7 +31,7 @@ export function boolUnify(f1, f2) {
     let query = mkOr(mkAnd(f1, mkNot(f2)), mkAnd(mkNot(f1), f2))
 
     // The free variables in the query.
-    let fvs = freeVars(query)
+    let fvs = boolFreeVars(query)
 
     try {
         let subst = successiveVariableElimination(query, fvs)

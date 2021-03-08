@@ -220,7 +220,7 @@ export function size(f) {
 /**
  * Returns all the free variables in the formula `f`.
  */
-export function freeVars(f) {
+export function boolFreeVars(f) {
     if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
 
     let result = new Set()
@@ -272,7 +272,7 @@ export function truthRow(f, fvs) {
 }
 
 /**
- * Returns the truth table for the given formula `f`.
+ * Returns the truth table for the given term `t`.
  *
  * The truth table is a multi dimensional array of the form:
  *
@@ -281,19 +281,19 @@ export function truthRow(f, fvs) {
  *   [T, T, F... F]
  * ]
  *
- * where each row is a valuation and last col is the result.
+ * where each row is a valuation and last col is the result (true/false/constructor).
  */
-export function truthTable(f, fvs) {
-    if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
+export function truthTable(t, fvs) {
+    if (t === undefined) throw new Error(`Illegal argument 't': ${t}.`)
     if (!Array.isArray(fvs)) throw new Error(`Illegal argument 'fvs': ${fvs}.`)
 
-    function visit(f, fvs) {
+    function visit(t, fvs) {
         if (fvs.length === 0) {
-            return [[f]];
+            return [[t]];
         } else {
             let [x, ...xs] = fvs;
-            let f1 = applySubst({[x]: TRUE}, f)
-            let f2 = applySubst({[x]: FALSE}, f)
+            let f1 = applySubst({[x]: TRUE}, t)
+            let f2 = applySubst({[x]: FALSE}, t)
 
             let extendedRows1 = visit(f1, xs).map(row => [TRUE, ...row])
             let extendedRows2 = visit(f2, xs).map(row => [FALSE, ...row])
@@ -301,7 +301,7 @@ export function truthTable(f, fvs) {
         }
     }
 
-    return visit(f, fvs)
+    return visit(t, fvs)
 }
 
 /**
@@ -365,7 +365,7 @@ function minBoolRecursively(f) {
 function lookup(f) {
     if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
 
-    let fvs = freeVars(f)
+    let fvs = boolFreeVars(f)
     let n = fvs.length
     let table = Cache[n]
 

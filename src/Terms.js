@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import {freeVars, isBool, showBool} from "./Bools";
+import {boolFreeVars, isBool, showBool} from "./Bools";
 
 /**
  * Returns `true` if the given `x` is a constructor.
@@ -67,7 +67,7 @@ export function termFreeVars(term) {
     }
 
     if (isBool(term)) {
-        return freeVars(term)
+        return boolFreeVars(term)
     } else if (isConstructor(term)) {
         return term.ts.map(t => termFreeVars(t)).flat()
     } else {

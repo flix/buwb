@@ -15,7 +15,8 @@
  */
 import React, {Component} from "react";
 import {Card, CardBody, CardHeader, Row, Table} from "reactstrap";
-import {isTrue} from "../Bools";
+import {isFalse, isTrue} from "../Bools";
+import {showTerm} from "../Terms";
 
 class TruthTable extends Component {
 
@@ -39,7 +40,7 @@ class TruthTable extends Component {
                             {tt.map(row => {
                                 let className = isTrue(row[row.length - 1]) ? "table-active" : ""
                                 return <tr className={className}>
-                                    {row.map((t, index) => isTrue(t) ? <td key={index}>T</td> : <td key={index}>F</td>)}
+                                    {row.map((term, index) => <td key={index}>{showTerm(term)}</td>)}
                                 </tr>
                             })}
                             </tbody>

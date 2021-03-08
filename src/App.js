@@ -24,9 +24,10 @@ import TruthTable from "./components/TruthTable";
 import UnificationFailure from "./components/UnificationFailure";
 import FormInput from "./components/FormInput";
 
-import {truthTable, freeVars} from "./Bools";
+import {truthTable} from "./Bools";
 import {unifyTerm} from "./TermUnification";
 import {applySubst} from "./Substitution";
+import {termFreeVars} from "./Terms";
 
 class App extends Component {
 
@@ -44,17 +45,12 @@ class App extends Component {
     }
 
     notifySolve(x, y) {
-        console.log("x = ", x)
-        console.log("y = ", y)
-
         let result = unifyTerm(x, y)
         if (result.status === "success") {
-            // TODO: Computing the truthtable is only applicable if there is ONE formula.
-
             // Compute the free variables in the input lhs and rhs.
             let vars = new Set()
-            freeVars(x).forEach(v => vars.add(v))
-            freeVars(y).forEach(v => vars.add(v))
+            termFreeVars(x).forEach(v => vars.add(v))
+            termFreeVars(y).forEach(v => vars.add(v))
             let fvs = [...vars].sort()
 
             // Compute the truth table. (It does not matter if we use x or y).
