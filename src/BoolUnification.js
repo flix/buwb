@@ -68,14 +68,16 @@ function successiveVariableElimination(f, fvs) {
         let t1 = applySubst({[x]: TRUE}, f)
         let se = successiveVariableElimination(mkAnd(t0, t1), xs)
         let st = {[x]: mkOr(applySubst(se, t0), mkAnd(mkVar(x), mkNot(applySubst(se, t1))))}
-        return mergeSubst(st, se)
+        return leftMerge(st, se)
     }
 }
 
 /**
  * Returns the left-biased composition of the substitutions `subst1` and `subst2`.
+ *
+ * That is, always retains all the bindings in `subst1`.
  */
-function mergeSubst(subst1, subst2) {
+function leftMerge(subst1, subst2) {
     if (typeof subst1 !== "object") {
         throw new Error(`Illegal argument 'subst1': ${subst1}.`)
     }
@@ -89,7 +91,7 @@ function mergeSubst(subst1, subst2) {
         result[key] = value
     }
     for (let [key, value] of Object.entries(subst2)) {
-        // Left-biased.
+        // Left-biased. Only add if not present in subst1.
         if (subst1[key] === undefined) {
             result[key] = value
         }
