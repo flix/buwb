@@ -35,7 +35,7 @@ class Substitution extends Component {
                         <Table>
                             <thead>
                             <tr>
-                                <th style={{width:"6rem"}}>Variable</th>
+                                <th style={{width: "6rem"}}>Variable</th>
                                 <th>Formula</th>
                             </tr>
                             </thead>
@@ -48,6 +48,13 @@ class Substitution extends Component {
                             ))}
                             </tbody>
                         </Table>
+                        <hr/>
+                        <p className="small text-secondary" style={{"marginBottom": "0.2rem"}}>
+                            <b>Note:</b> The solution to the Boolean Unification Problem is not always unique. We
+                            compute <i>a</i> most general unifier (mgu) but there may be (infinitely) many other most
+                            general unifiers. However, if there are, they are all most equi-most general
+                            (each can be obtained as an instance of the other, and vise versa).
+                        </p>
                     </CardBody>
                 </Card>
             </Row>
