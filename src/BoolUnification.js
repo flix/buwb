@@ -113,7 +113,7 @@ function satisfiable(f) {
     } else if (isFalse(f)) {
         return false
     } else {
-        throw new Error(`Illegal argument 'f': ${f.toString()}.`)
+        throw new Error(`Illegal argument 'f': ${f}.`)
     }
 }
 
