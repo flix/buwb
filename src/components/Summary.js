@@ -25,7 +25,7 @@ class Summary extends Component {
             return (
                 <Row className="col-12">
                     <Alert color="success" fade={false} className="mt-3 w-100">
-                        <b>Note:</b> The unifies reduce to TRUE, i.e. applying the mgu (substitution) to both formulas
+                        <b>Note:</b> The formulas reduce to TRUE, i.e. applying the mgu (substitution) to both formulas
                         reduce them to TRUE.
                     </Alert>
                 </Row>
@@ -34,7 +34,7 @@ class Summary extends Component {
             return (
                 <Row className="col-12">
                     <Alert color="success" fade={false} className="mt-3 w-100">
-                        <b>Note:</b> The unifies reduce to FALSE, i.e. applying the mgu (substitution) to both formulas
+                        <b>Note:</b> The formulas reduce to FALSE, i.e. applying the mgu (substitution) to both formulas
                         reduce them to FALSE.
                     </Alert>
                 </Row>)
