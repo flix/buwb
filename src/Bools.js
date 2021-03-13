@@ -187,9 +187,9 @@ export function showBool(f) {
     } else if (isNot(f)) {
         let withParens = precedence(f.f.type) >= precedence("NOT")
         if (withParens)
-            return `¬${showBool(f.f)}`
-        else
             return `¬(${showBool(f.f)})`
+        else
+            return `¬${showBool(f.f)}`
     } else if (isAnd(f)) {
         let withLParens = precedence(f.f1.type) >= precedence("AND");
         let withRParens = precedence(f.f2.type) >= precedence("AND");
