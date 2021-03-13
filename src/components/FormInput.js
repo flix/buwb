@@ -16,6 +16,7 @@
 import React, {Component} from "react";
 import {Card, CardBody, CardHeader, Col, CustomInput, Form, FormFeedback, FormGroup, Input, Row} from "reactstrap";
 import {parse} from "../Parser";
+import {minBool, showBool} from "../Bools";
 
 class FormInput extends Component {
 
@@ -61,6 +62,18 @@ class FormInput extends Component {
         }
     }
 
+    simplifyFormulas() {
+        function simplify(f) {
+            return showBool(minBool(f, true))
+        }
+
+        if (this.state.lhsParsed.valid && this.state.rhsParsed.valid) {
+            let lhs = simplify(this.state.lhsParsed.value)
+            let rhs = simplify(this.state.rhsParsed.value)
+            this.setState({lhsInput: lhs, rhsInput: rhs})
+        }
+    }
+
     render() {
         let reformat = this.props.reformat
         let logicSymbols = this.props.logicSymbols
@@ -87,7 +100,10 @@ class FormInput extends Component {
                                     {this.renderLHSInput()}
                                 </Col>
                                 <Col md={2}>
-                                    <p className="qeq">=</p>
+                                    <p className="qeq">
+                                        <span onClick={this.simplifyFormulas.bind(this)}
+                                              style={{"cursor": "pointer"}}>=</span>
+                                    </p>
                                 </Col>
                                 <Col md={5}>
                                     {this.renderRHSInput()}
