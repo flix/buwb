@@ -14,8 +14,10 @@
  *  limitations under the License.
  */
 import {applySubst} from "./Substitution.js";
-import {Cache} from "./Cache.js";
 import {precedence} from "./Precedence";
+import {Table} from "./Table"
+
+let parse = require("fast-sexpr")
 
 /**
  * The TRUE constant.
@@ -344,6 +346,33 @@ export function isAllFalse(tt) {
 }
 
 /**
+ * Parses the given s-expression to a formula.
+ */
+function parseSExp(sexp) {
+    if (sexp === undefined) throw new Error(`Illegal argument 'f': ${sexp}.`)
+    let key = sexp[0];
+
+    if (key === "T") {
+        return TRUE
+    } else if (key === "F") {
+        return FALSE
+    } else if (key === "not") {
+        let f = parseSExp(sexp[1])
+        return mkNot(f)
+    } else if (key === "and") {
+        let f1 = parseSExp(sexp[1])
+        let f2 = parseSExp(sexp[2])
+        return mkAnd(f1, f2)
+    } else if (key === "or") {
+        let f1 = parseSExp(sexp[1])
+        let f2 = parseSExp(sexp[2])
+        return mkOr(f1, f2)
+    } else {
+        return mkVar(sexp)
+    }
+}
+
+/**
  * Returns the minimized version of the formula `f`.
  */
 export function minBool(f, recurse) {
@@ -383,24 +412,33 @@ function minBoolRecursively(f) {
 }
 
 /**
+ * Load the minimization table into memory.
+ */
+let sexp = parse(Table);
+let entries = sexp[0].slice(1)
+let MinTable = {};
+entries.forEach(elm => {
+    let key = elm[0];
+    let formula = elm[1];
+    MinTable[key] = parseSExp(formula)
+});
+
+/**
  * Looks up the formula `f` in the cached table of minimal formulas.
  */
 function lookup(f) {
     if (f === undefined || !isBool(f)) throw new Error(`Illegal argument 'f': ${f}.`)
 
-    let fvs = boolFreeVars(f)
-    let n = fvs.length
-    let table = Cache[n]
-
-    if (table === undefined) {
+    if (MinTable === undefined) {
         // No lookup table. Simply return the formula.
         return f
     } else {
         // Compute the "semantics" of the formula.
+        let fvs = boolFreeVars(f)
         let resultVector = truthRow(f, fvs)
 
         // Look it up in the table.
-        let minimal = table[resultVector]
+        let minimal = MinTable[resultVector]
         if (minimal === undefined) {
             // Not found.
             return f
