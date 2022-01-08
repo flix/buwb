@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import {FALSE, boolFreeVars, isBool, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, showBool, TRUE, isVar} from "./Bools.js";
+import {FALSE, boolFreeVars, isBool, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, showBool, TRUE, isVar, isAnd, isSyntacticEq, isOr, isNot} from "./Bools.js";
 import {applySubst} from "./Substitution";
 
 /**
@@ -27,15 +27,23 @@ export function boolUnify(f1, f2) {
         throw new Error(`Illegal argument 'y': ${f2}.`)
     }
 
-    // Special case for when one side of the equation is a variable. This will generate a
-    // 'simpler' substitution than SVE, especially when the equation side has lots of variables.
-    if (isSingleVarSpecialCase(f1, f2)) {
-        let subst = {[f1.name]: f2}
-        return {status: "success", subst: subst}
-    }
-    if (isSingleVarSpecialCase(f2, f1)) {
-        let subst = {[f2.name]: f1}
-        return {status: "success", subst: subst}
+    // Special case for when
+    // 1. free(f1) ∩ free(f2) == {}
+    // 2. f1 matches f2 or f2 matches f1
+    // This will generate 'simpler' substitutions than SVE,
+    // especially when the equations have lots of variables.
+    let f1Free = boolFreeVars(f1);
+    let f2Free = boolFreeVars(f2);
+    let freeOverlap = [...f1Free].filter(x => f2Free.includes(x))
+    if (freeOverlap.length == 0) {
+        try {
+            let subst = syntacticMatch(f1, f2)
+            return {status: "success", subst: subst}
+        } catch (e) { }
+        try {
+            let subst = syntacticMatch(f2, f1)
+            return {status: "success", subst: subst}
+        } catch (e) { }
     }
 
     // The boolean expression we want to show is 0.
@@ -88,7 +96,7 @@ function successiveVariableElimination(f, fvs) {
  *
  * That is, always retains all the bindings in `subst1`.
  */
-function leftMerge(subst1, subst2) {
+function leftMerge(subst1, subst2, overlapMustMatch = false) {
     if (typeof subst1 !== "object") {
         throw new Error(`Illegal argument 'subst1': ${subst1}.`)
     }
@@ -105,6 +113,8 @@ function leftMerge(subst1, subst2) {
         // Left-biased. Only add if not present in subst1.
         if (subst1[key] === undefined) {
             result[key] = value
+        } else if (overlapMustMatch && !isSyntacticEq(subst1[key], value)) {
+            throw new SyntacticMatchError(`Variable ${key} matched two different values ${subst1[key]} and ${value}`)
         }
     }
 
@@ -129,10 +139,27 @@ function satisfiable(f) {
 }
 
 /**
- * Check whether an equation is of the form `Var(X) =? Equation`, where X not in free(Equation).
+ * Generates a substitution that makes subst(template) = inst, if one can
+ * be generated. Throws a SyntacticMatchError if a substitution cannot be
+ * generated.
  */
-function isSingleVarSpecialCase(maybeVar, maybeAssigned) {
-    return isVar(maybeVar) && !boolFreeVars(maybeAssigned).includes(maybeVar.name);
+function syntacticMatch(template, inst) {
+    if (isSyntacticEq(template, inst)) {
+        return {}
+    } else if (isVar(template)) {
+        return {[template.name]: inst}
+    } else if (isAnd(template) && isAnd(inst)) {
+        let leftSubst = syntacticMatch(template.f1, inst.f1)
+        let rightSubst = syntacticMatch(template.f2, inst.f2)
+        return leftMerge(leftSubst, rightSubst, true)
+    } else if (isOr(template) && isOr(inst)) {
+        let leftSubst = syntacticMatch(template.f1, inst.f1)
+        let rightSubst = syntacticMatch(template.f2, inst.f2)
+        return leftMerge(leftSubst, rightSubst, true)
+    } else if (isNot(template) && isNot(inst)) {
+        return syntacticMatch(template.f, inst.f)
+    }
+    throw new SyntacticMatchError(`Couldn't match '${template}' with '${inst}`)
 }
 
 /**
@@ -142,5 +169,15 @@ class SVEError extends Error {
     constructor(message) {
         super(message);
         this.name = "Boolean Unification Failure";
+    }
+}
+
+/**
+ * A custom exception used to signal failure of syntactic matching special case.
+ */
+class SyntacticMatchError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "Syntactic Match Failure";
     }
 }
