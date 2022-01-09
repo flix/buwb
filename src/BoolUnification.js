@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import {FALSE, boolFreeVars, isBool, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, showBool, TRUE, isVar} from "./Bools.js";
+import {FALSE, boolFreeVars, isBool, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, showBool, TRUE, isVar, truthTable, minBool} from "./Bools.js";
 import {applySubst} from "./Substitution";
 
 /**
@@ -133,6 +133,64 @@ function satisfiable(f) {
  */
 function isSingleVarSpecialCase(maybeVar, maybeAssigned) {
     return isVar(maybeVar) && !boolFreeVars(maybeAssigned).includes(maybeVar.name);
+}
+
+export function lowenheimUnify(f1, f2) {
+    if (f1 === undefined || !isBool(f1)) {
+        throw new Error(`Illegal argument 'x': ${f1}.`)
+    }
+    if (f2 === undefined || !isBool(f2)) {
+        throw new Error(`Illegal argument 'y': ${f2}.`)
+    }
+
+    // The boolean expression we want to show is 0.
+    let query = mkOr(mkAnd(f1, mkNot(f2)), mkAnd(mkNot(f1), f2))
+    // The free variables in the query.
+    let fvs = boolFreeVars(query)
+
+    let initUnifiers = initialUnifiers(query, fvs)
+    let mgus = initUnifiers.map(u => mguFromUnifier(u, query))
+
+    if (mgus.length === 0) {
+        return {status: "failure", reason: `Cannot unify: ${showBool(f1)} and ${showBool(f2)}`}
+    }
+
+    for (const [ind, mgu] of mgus.entries()) {
+        console.log(`MGU #${ind} with ${Object.keys(mgu).length} keys`)
+        for (const [key, val] of Object.entries(mgu)) {
+            console.log(`  ${key} --> ${showBool(minBool(val, true))}`)
+        }
+    }
+
+    return {status: "success", subst: mgus[mgus.length -1]}
+}
+
+function initialUnifiers(query, fvs) {
+    let tt = truthTable(query, fvs)
+    let falseRows = tt.filter(t => isFalse(t[t.length - 1]))
+    let unifiers = falseRows.map(row => {
+        let subst = {};
+        for (const [index, elem] of row.slice(0, -1).entries()) {
+            subst[fvs[index]] = elem
+        }
+        return subst
+    })
+    return unifiers
+}
+
+function mguFromUnifier(unifier, term) {
+    let mgu = {};
+    for (const [key, val] of Object.entries(unifier)) {
+        mgu[key] = lowenheimGen(key, val, term)
+    }
+    return mgu;
+}
+
+function lowenheimGen(substKey, substValue, term) {
+    let termXorTrue = mkOr(mkAnd(term, mkNot(TRUE)), mkAnd(mkNot(term), TRUE))
+    let andKey = mkAnd(termXorTrue, mkVar(substKey))
+    let termAndSubst = mkAnd(term, substValue)
+    return mkOr(mkAnd(andKey, mkNot(termAndSubst)), mkAnd(mkNot(andKey), termAndSubst))
 }
 
 /**

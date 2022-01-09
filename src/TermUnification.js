@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 import {isBool, minBool, showBool} from "./Bools";
-import {boolUnify} from "./BoolUnification";
+import {boolUnify, lowenheimUnify} from "./BoolUnification";
 import {applySubst, mergeSubst} from "./Substitution";
 import {isConstructor, mkConstructor, showTerm} from "./Terms";
 
@@ -30,7 +30,7 @@ export function unifyTerm(t1, t2) {
     }
 
     if (isBool(t1) && isBool(t2)) {
-        return boolUnify(t1, t2)
+        return lowenheimUnify(t1, t2)//boolUnify(t1, t2)
     } else if (isConstructor(t1) && isConstructor(t2)) {
         if (t1.name === t2.name) {
             return unifyTermLists(t1.ts, t2.ts)
