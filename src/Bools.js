@@ -153,7 +153,7 @@ export function mkOr(f1, f2) {
 /**
  * Returns `true` if the Boolean formulas `f1` and `f2` are *syntactically* equal.
  */
-export function isSyntacticEq(f1, f2) {
+function isSyntacticEq(f1, f2) {
     if (f1 === undefined || !isBool(f1)) throw new Error(`Illegal argument 'f1': ${f1}.`)
     if (f2 === undefined || !isBool(f2)) throw new Error(`Illegal argument 'f2': ${f2}.`)
 
