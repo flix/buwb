@@ -62,6 +62,14 @@ class FormInput extends Component {
         }
     }
 
+    notifyLowenheim() {
+        this.props.toggleLowenheim(() => {
+            if (this.state.lhsParsed.valid && this.state.rhsParsed.valid) {
+                this.props.notifySolve(this.state.lhsParsed.value, this.state.rhsParsed.value)
+            }
+        })
+    }
+
     simplifyFormulas() {
         function simplify(f) {
             return showBool(minBool(f, true))
@@ -81,6 +89,7 @@ class FormInput extends Component {
         let minimizeSubFormulas = this.props.minimizeSubFormulas
         let truthTable = this.props.truthTable
         let parenthesize = this.props.parenthesize
+        let lowenheim = this.props.lowenheim
 
         let toggleReformat = this.props.toggleReformat
         let toggleLogicSymbols = this.props.toggleLogicSymbols
@@ -150,6 +159,13 @@ class FormInput extends Component {
                                              label="Fully parenthesize"
                                              checked={parenthesize}
                                              onChange={toggleParenthesize}
+                                             inline
+                                />
+
+                                <CustomInput id="lowenheim" type="checkbox"
+                                             label="Use Lowenheim"
+                                             checked={lowenheim}
+                                             onChange={this.notifyLowenheim.bind(this)}
                                              inline
                                 />
                             </Row>

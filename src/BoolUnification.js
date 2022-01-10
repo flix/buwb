@@ -156,7 +156,6 @@ export function lowenheimUnify(f1, f2) {
     }
 
     for (const [ind, mgu] of mgus.entries()) {
-        console.log(`MGU #${ind} with ${Object.keys(mgu).length} keys`)
         for (const [key, val] of Object.entries(mgu)) {
             console.log(`  ${key} --> ${showBool(minBool(val, true))}`)
         }
