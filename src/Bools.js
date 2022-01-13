@@ -129,7 +129,7 @@ export function mkAnd(f1, f2) {
 }
 
 /**
- * Returns the disjunction of the two formulas `f1` and `f2`.
+ * Returns the inclusive disjunction of the two formulas `f1` and `f2`.
  */
 export function mkOr(f1, f2) {
     if (f1 === undefined || !isBool(f1)) throw new Error(`Illegal argument 'f1': ${f1}.`)
@@ -148,6 +148,17 @@ export function mkOr(f1, f2) {
     }
 
     return {type: 'OR', f1: f1, f2: f2}
+}
+
+/**
+ * Returns the exclusive disjunction of the two formulas `f1` and `f2`, as a construction
+ * of `mkOr`, `mkAnd`, and `mkNot`.
+ */
+export function mkXor(f1, f2) {
+    if (f1 === undefined || !isBool(f1)) throw new Error(`Illegal argument 'f1': ${f1}.`)
+    if (f2 === undefined || !isBool(f2)) throw new Error(`Illegal argument 'f2': ${f2}.`)
+
+    return mkOr(mkAnd(f1, mkNot(f2)), mkAnd(mkNot(f1), f2))
 }
 
 /**
