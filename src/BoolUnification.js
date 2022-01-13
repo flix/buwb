@@ -17,6 +17,25 @@ import {FALSE, boolFreeVars, isBool, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar,
 import {applySubst} from "./Substitution";
 
 /**
+ * Enumeration to select the available methods for unification
+ */
+export const METHOD = Object.freeze({
+    SVE: "sve",
+    Lowenheim: "lowenheim"
+})
+
+/**
+ * Given a value from the METHOD enumeration, returns the associated Boolean unification function.
+ */
+export function getUnifyMethod(methodName) {
+    switch (methodName) {
+        case METHOD.SVE: return boolUnify;
+        case METHOD.Lowenheim: return lowenheimUnify;
+        default: throw new Error(`Invalid Boolean unification method ${methodName}`)
+    }
+}
+
+/**
  * Returns a substitution that unifies f1 and f2 (if it exists).
  */
 export function boolUnify(f1, f2) {

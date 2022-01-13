@@ -29,7 +29,7 @@ import {unifyTerm} from "./TermUnification";
 import {applySubst} from "./Substitution";
 import {termFreeVars} from "./Terms";
 import Footer from "./components/Footer";
-import { boolUnify, lowenheimUnify } from './BoolUnification';
+import { getUnifyMethod, METHOD } from './BoolUnification';
 
 class App extends Component {
 
@@ -43,7 +43,7 @@ class App extends Component {
             minimizeSubFormulas: true,
             truthTable: false,
             parenthesize: false,
-            lowenheim: false,
+            unifyMethod: METHOD.SVE
         }
     }
 
@@ -53,8 +53,8 @@ class App extends Component {
         console.log("Solve y = ", y)
 
         // Compute the mgu.
-        let bUnify = this.state.lowenheim ? lowenheimUnify : boolUnify;
-        console.log(`Using Lowenheim: ${this.state.lowenheim}`)
+        console.log(`Using Boolean unification method: ${this.state.unifyMethod}`)
+        let bUnify = getUnifyMethod(this.state.unifyMethod)
         let result = unifyTerm(x, y, bUnify)
 
         // Check if it exists.
@@ -109,8 +109,8 @@ class App extends Component {
         this.setState({parenthesize: !this.state.parenthesize})
     }
 
-    toggleLowenheim(after) {
-        this.setState({lowenheim: !this.state.lowenheim}, after)
+    changeMethod(method, after) {
+        this.setState({unifyMethod: method}, after)
     }
 
     render() {
@@ -137,8 +137,8 @@ class App extends Component {
                     parenthesize={this.state.parenthesize}
                     toggleParenthesize={this.toggleParenthesize.bind(this)}
 
-                    lowenheim={this.state.lowenheim}
-                    toggleLowenheim={this.toggleLowenheim.bind(this)}
+                    unifyMethod={this.state.unifyMethod}
+                    changeMethod={this.changeMethod.bind(this)}
 
                     notifySolve={this.notifySolve.bind(this)}
                     notifyClear={this.notifyClear.bind(this)}
