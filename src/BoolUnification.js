@@ -46,17 +46,6 @@ export function boolUnify(f1, f2) {
         throw new Error(`Illegal argument 'y': ${f2}.`)
     }
 
-    // Special case for when one side of the equation is a variable. This will generate a
-    // 'simpler' substitution than SVE, especially when the equation side has lots of variables.
-    if (isSingleVarSpecialCase(f1, f2)) {
-        let subst = {[f1.name]: f2}
-        return {status: "success", subst: subst}
-    }
-    if (isSingleVarSpecialCase(f2, f1)) {
-        let subst = {[f2.name]: f1}
-        return {status: "success", subst: subst}
-    }
-
     // The boolean expression we want to show is 0.
     let query = mkOr(mkAnd(f1, mkNot(f2)), mkAnd(mkNot(f1), f2))
 
@@ -145,13 +134,6 @@ function satisfiable(f) {
     } else {
         throw new Error(`Illegal argument 'f': ${f}.`)
     }
-}
-
-/**
- * Check whether an equation is of the form `Var(X) =? Equation`, where X not in free(Equation).
- */
-function isSingleVarSpecialCase(maybeVar, maybeAssigned) {
-    return isVar(maybeVar) && !boolFreeVars(maybeAssigned).includes(maybeVar.name);
 }
 
 export function lowenheimUnify(f1, f2) {
