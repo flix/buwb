@@ -109,7 +109,7 @@ export function mkNot(f) {
 /**
  * Returns the conjunction of the two formulas `f1` and `f2`.
  */
-export function mkAnd(f1, f2) {
+ export function mkAnd(f1, f2) {
     if (f1 === undefined || !isBool(f1)) throw new Error(`Illegal argument 'f1': ${f1}.`)
     if (f2 === undefined || !isBool(f2)) throw new Error(`Illegal argument 'f2': ${f2}.`)
 
@@ -123,13 +123,19 @@ export function mkAnd(f1, f2) {
         return FALSE
     } else if (isSyntacticEq(f1, f2)) {
         return f1
+    } else if (isComplement(f1, f2)) {
+        return FALSE
+    } else if (isAndAbsorption(f1, f2)) {
+        return f1
+    } else if (isAndAbsorption(f2, f1)) {
+        return f2
     }
 
     return {type: 'AND', f1: f1, f2: f2}
 }
 
 /**
- * Returns the disjunction of the two formulas `f1` and `f2`.
+ * Returns the inclusive disjunction of the two formulas `f1` and `f2`.
  */
 export function mkOr(f1, f2) {
     if (f1 === undefined || !isBool(f1)) throw new Error(`Illegal argument 'f1': ${f1}.`)
@@ -145,9 +151,39 @@ export function mkOr(f1, f2) {
         return f1
     } else if (isSyntacticEq(f1, f2)) {
         return f1
+    } else if (isComplement(f1, f2)) {
+        return TRUE
+    } else if (isOrAbsorption(f1, f2)) {
+        return f1
+    } else if (isOrAbsorption(f2, f1)) {
+        return f2
     }
 
     return {type: 'OR', f1: f1, f2: f2}
+}
+
+/**
+ * Returns `true` if `f1` is the syntactic complement of `f2`.
+ */
+function isComplement(f1, f2) {
+    return (isNot(f2) && isSyntacticEq(f1, f2.f))
+        || (isNot(f1) && isSyntacticEq(f2, f1.f))
+}
+
+/**
+ * Returns `true` if `f` is a syntactic component of `absorb`,
+ * e.g. `f && (? || f) = true` or `f && (f || ?) = true`
+ */
+ function isAndAbsorption(f, absorb) {
+    return isOr(absorb) && (isSyntacticEq(f, absorb.f2) || isSyntacticEq(f, absorb.f1))
+}
+
+/**
+ * Returns `true` if `f` is a syntactic component of `absorb`,
+ * e.g. `f || (? && f) = true` or `f || (f && ?) = true`
+ */
+function isOrAbsorption(f, absorb) {
+    return isAnd(absorb) && (isSyntacticEq(f, absorb.f2) || isSyntacticEq(f, absorb.f1))
 }
 
 /**

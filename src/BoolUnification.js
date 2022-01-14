@@ -27,22 +27,20 @@ export function boolUnify(f1, f2) {
         throw new Error(`Illegal argument 'y': ${f2}.`)
     }
 
-    // Special case for when one side of the equation is a variable. This will generate a
-    // 'simpler' substitution than SVE, especially when the equation side has lots of variables.
-    if (isSingleVarSpecialCase(f1, f2)) {
-        let subst = {[f1.name]: f2}
-        return {status: "success", subst: subst}
-    }
-    if (isSingleVarSpecialCase(f2, f1)) {
-        let subst = {[f2.name]: f1}
-        return {status: "success", subst: subst}
-    }
-
     // The boolean expression we want to show is 0.
     let query = mkOr(mkAnd(f1, mkNot(f2)), mkAnd(mkNot(f1), f2))
 
     // The free variables in the query.
-    let fvs = boolFreeVars(query)
+    // Idea by Jaco van de Pol: We check to see if one
+    // side of the equation has a single variable here, and put
+    // it first in the list of free variables, so that SVE will
+    // eliminate one side first. SVE will generate a smaller, more
+    // intuitive MGU as a result.
+    let fvsF1 = boolFreeVars(f1)
+    let fvsF2 = boolFreeVars(f2)
+    let fvs = fvsF2.length == 1
+        ? [...fvsF2,...fvsF1]
+        : [...fvsF1,...fvsF2]
 
     try {
         let subst = successiveVariableElimination(query, fvs)
@@ -126,13 +124,6 @@ function satisfiable(f) {
     } else {
         throw new Error(`Illegal argument 'f': ${f}.`)
     }
-}
-
-/**
- * Check whether an equation is of the form `Var(X) =? Equation`, where X not in free(Equation).
- */
-function isSingleVarSpecialCase(maybeVar, maybeAssigned) {
-    return isVar(maybeVar) && !boolFreeVars(maybeAssigned).includes(maybeVar.name);
 }
 
 /**
