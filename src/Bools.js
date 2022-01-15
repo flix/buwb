@@ -499,7 +499,7 @@ function lookup(f) {
             return TRUE
         }
 
-        let resultId = resultVector.map(truthElemString)
+        let resultId = resultVector.map(truthElemString).join("")
 
         // Look it up in the table.
         let minimal = MinTable[resultId]
