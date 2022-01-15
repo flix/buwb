@@ -31,14 +31,14 @@ export function boolUnify(f1, f2) {
     let query = mkOr(mkAnd(f1, mkNot(f2)), mkAnd(mkNot(f1), f2))
 
     // The free variables in the query.
-    // Idea by Jaco van de Pol: We check to see if one
-    // side of the equation has a single variable here, and put
-    // it first in the list of free variables, so that SVE will
-    // eliminate one side first. SVE will generate a smaller, more
-    // intuitive MGU as a result.
+    // Generalization of an idea by Jaco van de Pol: We check to see
+    // if one side of the equation has fewer free variables, and put
+    // those first in the list of free variables, so that SVE will
+    // eliminate the smaller side first. SVE will generate a smaller,
+    // more intuitive MGU as a result.
     let fvsF1 = boolFreeVars(f1)
     let fvsF2 = boolFreeVars(f2)
-    let fvs = fvsF2.length == 1
+    let fvs = fvsF2.length < fvsF1.length
         ? [...fvsF2,...fvsF1.filter(v => !fvsF2.includes(v))]
         : [...fvsF1,...fvsF2.filter(v => !fvsF1.includes(v))]
 

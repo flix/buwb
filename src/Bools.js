@@ -174,7 +174,7 @@ function isComplement(f1, f2) {
  * Returns `true` if `f` is a syntactic component of `absorb`,
  * e.g. `f && (? || f) = true` or `f && (f || ?) = true`
  */
- function isAndAbsorption(f, absorb) {
+function isAndAbsorption(f, absorb) {
     return isOr(absorb) && (isSyntacticEq(f, absorb.f2) || isSyntacticEq(f, absorb.f1))
 }
 
@@ -320,15 +320,15 @@ export function truthRow(f, fvs) {
 
     if (fvs.length === 0) {
         if (isTrue(f)) {
-            return "T"
+            return [f]
         } else if (isFalse(f)) {
-            return "F"
+            return [f]
         } else {
             throw new Error(`Unexpected value 'f': ${f}.`)
         }
     } else {
         let [x, ...xs] = fvs
-        return truthRow(applySubst({[x]: TRUE}, f), xs) + truthRow(applySubst({[x]: FALSE}, f), xs)
+        return truthRow(applySubst({[x]: TRUE}, f), xs).concat(truthRow(applySubst({[x]: FALSE}, f), xs))
     }
 }
 
@@ -459,6 +459,14 @@ entries.forEach(elm => {
     MinTable[key] = parseSExp(formula)
 });
 
+function truthElemString(b) {
+    if (isTrue(b)) {
+        return "T"
+    } else {
+        return "F"
+    }
+}
+
 /**
  * Looks up the formula `f` in the cached table of minimal formulas.
  */
@@ -473,8 +481,17 @@ function lookup(f) {
         let fvs = boolFreeVars(f)
         let resultVector = truthRow(f, fvs)
 
+        // Easy cases that work without any table, for any number of variables.
+        if (resultVector.every((r) => r == FALSE)) {
+            return FALSE
+        } else if (resultVector.every((r) => r == TRUE)) {
+            return TRUE
+        }
+
+        let resultId = resultVector.map(truthElemString)
+
         // Look it up in the table.
-        let minimal = MinTable[resultVector]
+        let minimal = MinTable[resultId]
         if (minimal === undefined) {
             // Not found.
             return f
