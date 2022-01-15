@@ -39,8 +39,8 @@ export function boolUnify(f1, f2) {
     let fvsF1 = boolFreeVars(f1)
     let fvsF2 = boolFreeVars(f2)
     let fvs = fvsF2.length == 1
-        ? [...fvsF2,...fvsF1]
-        : [...fvsF1,...fvsF2]
+        ? [...fvsF2,...fvsF1.filter(v => !fvsF2.includes(v))]
+        : [...fvsF1,...fvsF2.filter(v => !fvsF1.includes(v))]
 
     try {
         let subst = successiveVariableElimination(query, fvs)
