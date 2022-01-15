@@ -29,6 +29,7 @@ import {unifyTerm} from "./TermUnification";
 import {applySubst} from "./Substitution";
 import {termFreeVars} from "./Terms";
 import Footer from "./components/Footer";
+import { getUnifyMethod, METHOD } from './BoolUnification';
 
 class App extends Component {
 
@@ -42,6 +43,7 @@ class App extends Component {
             minimizeSubFormulas: true,
             truthTable: false,
             parenthesize: false,
+            unifyMethod: METHOD.SVE
         }
     }
 
@@ -51,7 +53,9 @@ class App extends Component {
         console.log("Solve y = ", y)
 
         // Compute the mgu.
-        let result = unifyTerm(x, y)
+        console.log(`Using Boolean unification method: ${this.state.unifyMethod}`)
+        let bUnify = getUnifyMethod(this.state.unifyMethod)
+        let result = unifyTerm(x, y, bUnify)
 
         // Check if it exists.
         if (result.status === "success") {
@@ -105,6 +109,10 @@ class App extends Component {
         this.setState({parenthesize: !this.state.parenthesize})
     }
 
+    changeMethod(method, after) {
+        this.setState({unifyMethod: method}, after)
+    }
+
     render() {
         return (
             <Container>
@@ -128,6 +136,9 @@ class App extends Component {
 
                     parenthesize={this.state.parenthesize}
                     toggleParenthesize={this.toggleParenthesize.bind(this)}
+
+                    unifyMethod={this.state.unifyMethod}
+                    changeMethod={this.changeMethod.bind(this)}
 
                     notifySolve={this.notifySolve.bind(this)}
                     notifyClear={this.notifyClear.bind(this)}

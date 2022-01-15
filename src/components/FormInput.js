@@ -17,6 +17,7 @@ import React, {Component} from "react";
 import {Card, CardBody, CardHeader, Col, CustomInput, Form, FormFeedback, FormGroup, Input, Row} from "reactstrap";
 import {parse} from "../Parser";
 import {minBool, showBool} from "../Bools";
+import { METHOD } from "../BoolUnification";
 
 class FormInput extends Component {
 
@@ -62,6 +63,15 @@ class FormInput extends Component {
         }
     }
 
+    notifyChangeMethod(e) {
+        console.log(e.target.value)
+        this.props.changeMethod(e.target.value, () => {
+            if (this.state.lhsParsed.valid && this.state.rhsParsed.valid) {
+                this.props.notifySolve(this.state.lhsParsed.value, this.state.rhsParsed.value)
+            }
+        })
+    }
+
     simplifyFormulas() {
         function simplify(f) {
             return showBool(minBool(f, true))
@@ -81,6 +91,7 @@ class FormInput extends Component {
         let minimizeSubFormulas = this.props.minimizeSubFormulas
         let truthTable = this.props.truthTable
         let parenthesize = this.props.parenthesize
+        let method = this.props.unifyMethod
 
         let toggleReformat = this.props.toggleReformat
         let toggleLogicSymbols = this.props.toggleLogicSymbols
@@ -88,6 +99,11 @@ class FormInput extends Component {
         let toggleMinimizeSubFormulas = this.props.toggleMinimizeSubFormulas
         let toggleTruthTable = this.props.toggleTruthTable
         let toggleParenthesize = this.props.toggleParenthesize
+
+        const methodOptions = [];
+        for (const [key, value] of Object.entries(METHOD)) {
+            methodOptions.push(<option value={value}>{key}</option>)
+        }
 
         return (
             <Row className="col-12">
@@ -152,6 +168,14 @@ class FormInput extends Component {
                                              onChange={toggleParenthesize}
                                              inline
                                 />
+
+                                <CustomInput id="method" type="select"
+                                             label="Method"
+                                             onChange={this.notifyChangeMethod.bind(this)}
+                                             value={method}
+                                >
+                                    {methodOptions}
+                                </CustomInput>
                             </Row>
                         </Form>
                     </CardBody>
