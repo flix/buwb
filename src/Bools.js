@@ -109,7 +109,7 @@ export function mkNot(f) {
 /**
  * Returns the conjunction of the two formulas `f1` and `f2`.
  */
- export function mkAnd(f1, f2) {
+export function mkAnd(f1, f2) {
     if (f1 === undefined || !isBool(f1)) throw new Error(`Illegal argument 'f1': ${f1}.`)
     if (f2 === undefined || !isBool(f2)) throw new Error(`Illegal argument 'f2': ${f2}.`)
 
@@ -135,7 +135,7 @@ export function mkNot(f) {
 }
 
 /**
- * Returns the inclusive disjunction of the two formulas `f1` and `f2`.
+ * Returns the disjunction of the two formulas `f1` and `f2`.
  */
 export function mkOr(f1, f2) {
     if (f1 === undefined || !isBool(f1)) throw new Error(`Illegal argument 'f1': ${f1}.`)
