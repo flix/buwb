@@ -14,10 +14,22 @@
  *  limitations under the License.
  */
 import React, {Component} from "react";
-import {Card, CardBody, CardHeader, Col, CustomInput, Form, FormFeedback, FormGroup, Input, Row} from "reactstrap";
+import {
+    Card,
+    CardBody,
+    CardHeader,
+    Col,
+    CustomInput,
+    Form,
+    FormFeedback,
+    FormGroup,
+    Input,
+    Label,
+    Row
+} from "reactstrap";
 import {parse} from "../Parser";
 import {minBool, showBool} from "../Bools";
-import { METHOD } from "../BoolUnification";
+import {METHOD} from "../BoolUnification.js";
 
 class FormInput extends Component {
 
@@ -63,9 +75,8 @@ class FormInput extends Component {
         }
     }
 
-    notifyChangeMethod(e) {
-        console.log(e.target.value)
-        this.props.changeMethod(e.target.value, () => {
+    notifyChangeMethod(method) {
+        this.props.changeMethod(method, () => {
             if (this.state.lhsParsed.valid && this.state.rhsParsed.valid) {
                 this.props.notifySolve(this.state.lhsParsed.value, this.state.rhsParsed.value)
             }
@@ -99,11 +110,6 @@ class FormInput extends Component {
         let toggleMinimizeSubFormulas = this.props.toggleMinimizeSubFormulas
         let toggleTruthTable = this.props.toggleTruthTable
         let toggleParenthesize = this.props.toggleParenthesize
-
-        const methodOptions = [];
-        for (const [key, value] of Object.entries(METHOD)) {
-            methodOptions.push(<option value={value}>{key}</option>)
-        }
 
         return (
             <Row className="col-12">
@@ -168,14 +174,26 @@ class FormInput extends Component {
                                              onChange={toggleParenthesize}
                                              inline
                                 />
+                            </Row>
 
-                                <CustomInput id="method" type="select"
-                                             label="Method"
-                                             onChange={this.notifyChangeMethod.bind(this)}
-                                             value={method}
-                                >
-                                    {methodOptions}
-                                </CustomInput>
+                            <hr/>
+
+                            <Row form className="mb-0 pb-0 float-right">
+                                <FormGroup check className="mr-4">
+                                    <Label check>
+                                        <Input type="radio" name="radio" defaultChecked
+                                               onClick={() => this.notifyChangeMethod(METHOD.SVE)}/>
+                                        Successive Variable Elimination (SVE)
+                                    </Label>
+                                </FormGroup>
+
+                                <FormGroup check>
+                                    <Label check>
+                                        <Input type="radio" name="radio"
+                                               onClick={() => this.notifyChangeMethod(METHOD.Lowenheim)}/>
+                                        Löwenheim's Algorithm
+                                    </Label>
+                                </FormGroup>
                             </Row>
                         </Form>
                     </CardBody>

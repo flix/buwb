@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import {FALSE, boolFreeVars, isBool, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, showBool, TRUE, isVar, truthTable, minBool, mkXor} from "./Bools.js";
+import {FALSE, boolFreeVars, isBool, isFalse, isTrue, mkAnd, mkNot, mkOr, mkVar, showBool, TRUE, truthTable, minBool, mkXor} from "./Bools.js";
 import {applySubst} from "./Substitution";
 
 /**
@@ -174,7 +174,7 @@ export function lowenheimUnify(f1, f2) {
     }
 
     // show all most-general unifiers computed in the console
-    for (const [ind, mgu] of mgus.entries()) {
+    for (const [_index, mgu] of mgus.entries()) {
         for (const [key, val] of Object.entries(mgu)) {
             console.log(`  ${key} --> ${showBool(minBool(val, true))}`)
         }
