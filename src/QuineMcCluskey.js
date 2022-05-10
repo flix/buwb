@@ -29,6 +29,10 @@ function groupBy(items, pred) {
     }, [])
 }
 
+function rowToInt(row) {
+    return row.reduce((res, val, ind) => res + (val === TRUE ? 1 << ind : 0), 0)
+}
+
 /**
  * Given a row entry from a truth table, returns the number of elements
  * in the row that are True.
@@ -52,9 +56,9 @@ function compareRowAgainst(row, others, expectedDashes) {
     let matched = []
     for (let other of others) {
         // generate a new implicant with non-matching elements replaced by '-'
-        let test = row.map((elem, ind) => elem === other[ind] ? elem : DASH)
+        let test = row.row.map((elem, ind) => elem === other.row[ind] ? elem : DASH)
         if (dashCountInRow(test) === expectedDashes) {
-            implicants.push(test)
+            implicants.push({ name: row.name + "," + other.name, row: test })
             matched.push(other)
         }
     }
@@ -62,14 +66,11 @@ function compareRowAgainst(row, others, expectedDashes) {
 }
 
 function dedupRowSet(rows) {
-    function rowEq(r1, r2) {
-        return r1.length === r2.length && r1.map((elem, ind) => elem === r2[ind])
-    }
     var seen = [];
     for (let item of rows) {
         let add = true
         for (let s of seen) {
-            if (rowEq(item, s)) {
+            if (item.name === s.name) {
                 add = false
                 break
             }
@@ -81,7 +82,7 @@ function dedupRowSet(rows) {
     return seen
 }
 
-export function primeImplicants(term) {
+export function quineMcCluskeyMinimize(term) {
     let free = boolFreeVars(term)
     let truth = truthTable(term, free)
 
@@ -89,11 +90,18 @@ export function primeImplicants(term) {
     // Using pop() here also removes the truth column element since we
     // don't want it when comparing rows.
     let minTerms = truth.filter(row => row.pop() === TRUE)
+    let namedMinTerms = minTerms.map(row => { name: rowToInt(row).toString(), row: row })
 
+    let primes = primeImplicants(namedMinTerms)
+    let chart = implicantChart(primes, namedMinTerms)
+    let { essentials, covered, remaining, uncovered } = essentialPrimes(primes, namedMinTerms)
+}
+
+export function primeImplicants(namedMinTerms) {
     // Group the minTerms by the number of T elements each row contains.
     // We will compare rows with no Ts against rows with one T, rows with
     // one T against rows with two Ts, and so on...
-    let grouped = groupBy(minTerms, trueCountInRow)
+    let grouped = groupBy(namedMinTerms, named => trueCountInRow(named.row))
 
     // keep reducing as long as there are terms with only one differing row element
     let primes = []
@@ -129,7 +137,10 @@ export function primeImplicants(term) {
         // if not, add it to the prime set
         for (let i = 0; i < remaining.length; i++) {
             for (let row of remaining[i]) {
-                // if not checked.contains(row) then primes.push(row)
+                // if the row wasn't checked, it's a prime implicant
+                if (checked.filter(c => c.name == row.name).length < 1) {
+                    primes.push(row)
+                }
             }
         }
 
@@ -139,4 +150,50 @@ export function primeImplicants(term) {
 
     dedupRowSet(primes)
     return primes
+}
+
+export function implicantChart(primes, minTerms) {
+    let chart = []
+    for (let p of primes) {
+        let row = []
+        let names = p.name.split(",")
+        for (let m of minTerms) {
+            row.push(names.includes(m.name) ? true : false)
+        }
+        chart.push(p)
+    }
+    return chart
+}
+
+export function essentialPrimes(primes, minTerms) {
+    let essentials = []
+    let covered = []
+    let remaining = []
+    let uncovered = []
+    let primeNames = primes.map(p => p.name.split(","))
+    for (let m of minTerms) {
+        let checks = []
+        primeNames.forEach((ns, i) => {
+            if (ns.includes(m.name)) {
+                checks.push[i]
+            }
+        });
+        if (checks.length === 1) {
+            essentials.push(primes[checks[0]])
+            covered.concat(primeNames[checks[0]])
+        }
+    }
+
+    // determine which prime implicants and minterms are remaining to be investigated
+    for (let p of primes) {
+        if (essentials.filter(e => p.name == e.name).length < 1) {
+            remaining.push(p)
+        }
+    }
+    for (let m of minTerms) {
+        if (!covered.includes(m.name)) {
+            uncovered.push(m)
+        }
+    }
+    return { essentials, covered, remaining, uncovered }
 }
