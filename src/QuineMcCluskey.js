@@ -15,7 +15,7 @@
  */
 import {applySubst} from "./Substitution.js";
 import {Table} from "./Table"
-import { boolFreeVars, TRUE, truthTable } from "./Bools.js";
+import { boolFreeVars, isFalse, isTrue, mkAnd, mkNot, mkVar, TRUE, truthTable } from "./Bools.js";
 
 
 export let DASH = {type: '-'}
@@ -38,11 +38,11 @@ function rowToInt(row) {
  * in the row that are True.
  */
 function trueCountInRow(row) {
-    return row.reduce((ts, e) => ts + (e === TRUE ? 1 : 0), 0)
+    return row.reduce((ts, e) => ts + (isTrue(e) ? 1 : 0), 0)
 }
 
 function dashCountInRow(row) {
-    return row.reduce((ts, e) => ts + (e === DASH ? 1 : 0), 0)
+    return row.reduce((ts, e) => ts + (e.type === '-' ? 1 : 0), 0)
 }
 
 /**
@@ -89,12 +89,35 @@ export function quineMcCluskeyMinimize(term) {
     // minTerms are elements of the truth table where the result is T.
     // Using pop() here also removes the truth column element since we
     // don't want it when comparing rows.
-    let minTerms = truth.filter(row => row.pop() === TRUE)
+    let minTerms = truth.filter(row => isTrue(row.pop()))
     let namedMinTerms = minTerms.map(row => { name: rowToInt(row).toString(), row: row })
 
+    // get the set of prime implicants from the minTerms
     let primes = primeImplicants(namedMinTerms)
     let chart = implicantChart(primes, namedMinTerms)
+    // find which implicants are essential prime implicants; these must
+    // be included because they are the only implicants that cover certain minTerms
     let { essentials, covered, remaining, uncovered } = essentialPrimes(primes, namedMinTerms)
+    // for the remaining uncovered minTerms, there are ambiguities in which should be chosen
+    // Petrick's method is a way to systematically compute the result
+    if (uncovered.length > 0) {
+        let selectedImplicants = petricks(remaining, uncovered)
+        essentials = essentials.concat(selectedImplicants)
+    }
+    
+    // convert back to a bool term
+    let finalTerm = []
+    for (let e of essentials) {
+        let vars = e.row.filter(rowElem => rowElem.type !== '-').map((rowElem, rowInd) => {
+            if (isTrue(rowElem)) {
+                return mkVar(free[rowInd])
+            }
+            return mkNot(mkVar(free[rowInd]))
+        })
+        let subTerm = vars.reduce((sub, v) => mkAnd(sub, v), TRUE)
+        finalTerm.push(subTerm)
+    }
+    return finalTerm.reduce((final, sub) => mkOr(final, sub), FALSE)
 }
 
 export function primeImplicants(namedMinTerms) {
@@ -180,7 +203,7 @@ export function essentialPrimes(primes, minTerms) {
         });
         if (checks.length === 1) {
             essentials.push(primes[checks[0]])
-            covered.concat(primeNames[checks[0]])
+            covered = covered.concat(primeNames[checks[0]])
         }
     }
 
@@ -196,4 +219,78 @@ export function essentialPrimes(primes, minTerms) {
         }
     }
     return { essentials, covered, remaining, uncovered }
+}
+
+/**
+ * Given a set of prime implicants and minTerms where each minTerm is covered by
+ * at least two implicants, Petrick's method constructs a minimum sum-of-product
+ * term that covers all the given minTerms. The smallest term of this sum-of-product
+ * is returned as the minimal set of covering implicants.
+ */
+export function petricks(primes, minTerms) {
+    let product = productOfSums(primes, minTerms)
+    let sum = productOfSumsToSumOfProducts(product)
+    // bring a smallest length term to the front so we can select it
+    sum.sort((l, r) => l.length - r.length)
+    // the sums is a list of list of string, we need to bring it back to the implicant
+    let implicants = []
+    for (let name in sum[0]) {
+        implicants.push(primes.find(p => p.name === name))
+    }
+    return implicants
+}
+
+export function productOfSums(primes, minTerms) {
+    let products = []
+    for (let m of minTerms) {
+        let sums = []
+        for (let p of primes) {
+            if (p.name.split(",").includes(m.name)) {
+                sums.push(p.name)
+            }
+        }
+        products.push(sums)
+    }
+    return products
+}
+
+// (a+b+c)(d+e)(f+g) = (da+db+dc)(f+g) = (fda+fdb+fdc+gda+gdb+gdc)
+export function productOfSumsToSumOfProducts(products) {
+    let sums = [products.pop()]
+    while (products.length > 0) {
+        let term = products.pop()
+        let newSums = []
+        for (t of term) {
+            for (s of sums) {
+                if (s.includes(t)) {
+                    newSums.push(s)
+                } else {
+                    newSums.push([t,...s])
+                }
+            }
+        }
+        sums = newSums
+    }
+    return reduceByAbsorption(sums)
+}
+
+function reduceByAbsorption(sums) {
+    let reduced = []
+    while (sums.length > 0) {
+        let product = sums.pop()
+        if (sums.some(s => productIsSubset(s, product)) || reduced.some(s => productIsSubset(s, product))) {
+            continue
+        }
+        reduced.push(product)
+    }
+    return reduced
+}
+
+function productIsSubset(test, cmp) {
+    for (let prime of test) {
+        if (!cmp.includes(prime)) {
+            return false
+        }
+    }
+    return true
 }
