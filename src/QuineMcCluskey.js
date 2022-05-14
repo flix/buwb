@@ -13,9 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import {applySubst} from "./Substitution.js";
-import {Table} from "./Table"
-import { boolFreeVars, isFalse, isTrue, mkAnd, mkOr, mkNot, mkVar, TRUE, FALSE, truthTable } from "./Bools.js";
+import { boolFreeVars, isFalse, isTrue, mkAnd, mkOr, mkNot, mkVar, TRUE, FALSE, truthTable, showBool } from "./Bools.js";
 
 
 export let DASH = {type: '-'}
@@ -26,7 +24,7 @@ function groupBy(items, pred) {
         groups[val] = groups[val] || []
         groups[val].push(item)
         return groups
-    }, [])
+    }, []).filter(val => val !== undefined)
 }
 
 function rowToInt(row) {
@@ -83,6 +81,7 @@ function dedupRowSet(rows) {
 }
 
 export function quineMcCluskeyMinimize(term) {
+    console.log('reducing: ', showBool(term))
     let free = boolFreeVars(term)
     let truth = truthTable(term, free)
 
@@ -98,23 +97,27 @@ export function quineMcCluskeyMinimize(term) {
     // find which implicants are essential prime implicants; these must
     // be included because they are the only implicants that cover certain minTerms
     let { essentials, covered, remaining, uncovered } = essentialPrimes(primes, namedMinTerms)
+    console.log('original essentials: ', essentials)
+    console.log('uncovered', uncovered)
     // for the remaining uncovered minTerms, there are ambiguities in which should be chosen
     // Petrick's method is a way to systematically compute the result
     if (uncovered.length > 0) {
         let selectedImplicants = petricks(remaining, uncovered)
         essentials = essentials.concat(selectedImplicants)
     }
+    console.log('final essentials: ', essentials)
     
     // convert back to a bool term
     let finalTerm = []
     for (let e of essentials) {
-        let vars = e.row.filter(rowElem => rowElem.type !== '-').map((rowElem, rowInd) => {
+        let subTerm = e.row.reduce((sub, rowElem, rowInd) => {
             if (isTrue(rowElem)) {
-                return mkVar(free[rowInd])
+                return mkAnd(sub, mkVar(free[rowInd]))
+            } else if (isFalse(rowElem)) {
+                return mkAnd(sub, mkNot(mkVar(free[rowInd])))
             }
-            return mkNot(mkVar(free[rowInd]))
-        })
-        let subTerm = vars.reduce((sub, v) => mkAnd(sub, v), TRUE)
+            return sub
+        }, TRUE)
         finalTerm.push(subTerm)
     }
     return finalTerm.reduce((final, sub) => mkOr(final, sub), FALSE)
@@ -132,7 +135,7 @@ export function primeImplicants(namedMinTerms) {
     let checked = []
     // keep track of how many iterations we've performed; equivalent to the number
     // of dashes in the remaining minTerms
-    let iterSteps = 0
+    let iterSteps = 1
 
     do {
         let newRemaining = []
@@ -153,25 +156,26 @@ export function primeImplicants(namedMinTerms) {
             }
         }
 
-        dedupRowSet(checked)
-        dedupRowSet(newRemaining)
+        checked = dedupRowSet(checked)
+        newRemaining = dedupRowSet(newRemaining)
 
         // one last iteration over each row to determine if it was matched with another
         // if not, add it to the prime set
         for (let i = 0; i < remaining.length; i++) {
             for (let row of remaining[i]) {
                 // if the row wasn't checked, it's a prime implicant
-                if (checked.filter(c => c.name == row.name).length < 1) {
+                if (!checked.some(c => c.name === row.name)) {
                     primes.push(row)
                 }
             }
         }
 
         iterSteps += 1
-        remaining = newRemaining
+        remaining = groupBy(newRemaining, named => trueCountInRow(named.row))
     } while(checked.length > 0)
 
     dedupRowSet(primes)
+    console.log('primes:', primes)
     return primes
 }
 
@@ -198,7 +202,7 @@ export function essentialPrimes(primes, minTerms) {
         let checks = []
         primeNames.forEach((ns, i) => {
             if (ns.includes(m.name)) {
-                checks.push[i]
+                checks.push(i)
             }
         });
         if (checks.length === 1) {
@@ -207,9 +211,11 @@ export function essentialPrimes(primes, minTerms) {
         }
     }
 
+    essentials = dedupRowSet(essentials)
+
     // determine which prime implicants and minterms are remaining to be investigated
     for (let p of primes) {
-        if (essentials.filter(e => p.name == e.name).length < 1) {
+        if (!essentials.some(e => p.name === e.name)) {
             remaining.push(p)
         }
     }
