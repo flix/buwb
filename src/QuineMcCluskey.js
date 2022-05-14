@@ -15,7 +15,7 @@
  */
 import {applySubst} from "./Substitution.js";
 import {Table} from "./Table"
-import { boolFreeVars, isFalse, isTrue, mkAnd, mkNot, mkVar, TRUE, truthTable } from "./Bools.js";
+import { boolFreeVars, isFalse, isTrue, mkAnd, mkOr, mkNot, mkVar, TRUE, FALSE, truthTable } from "./Bools.js";
 
 
 export let DASH = {type: '-'}
@@ -90,7 +90,7 @@ export function quineMcCluskeyMinimize(term) {
     // Using pop() here also removes the truth column element since we
     // don't want it when comparing rows.
     let minTerms = truth.filter(row => isTrue(row.pop()))
-    let namedMinTerms = minTerms.map(row => { name: rowToInt(row).toString(), row: row })
+    let namedMinTerms = minTerms.map(row => { return { name: rowToInt(row).toString(), row: row }; })
 
     // get the set of prime implicants from the minTerms
     let primes = primeImplicants(namedMinTerms)
@@ -260,8 +260,8 @@ export function productOfSumsToSumOfProducts(products) {
     while (products.length > 0) {
         let term = products.pop()
         let newSums = []
-        for (t of term) {
-            for (s of sums) {
+        for (let t of term) {
+            for (let s of sums) {
                 if (s.includes(t)) {
                     newSums.push(s)
                 } else {

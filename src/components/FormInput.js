@@ -100,6 +100,7 @@ class FormInput extends Component {
         let logicSymbols = this.props.logicSymbols
         let minimize = this.props.minimize
         let minimizeSubFormulas = this.props.minimizeSubFormulas
+        let minimizeQuineMcCluskey = this.props.minimizeQuineMcCluskey
         let truthTable = this.props.truthTable
         let parenthesize = this.props.parenthesize
         let method = this.props.unifyMethod
@@ -108,6 +109,7 @@ class FormInput extends Component {
         let toggleLogicSymbols = this.props.toggleLogicSymbols
         let toggleMinimize = this.props.toggleMinimize
         let toggleMinimizeSubFormulas = this.props.toggleMinimizeSubFormulas
+        let toggleMinimizeQuineMcCluskey = this.props.toggleMinimizeQuineMcCluskey
         let toggleTruthTable = this.props.toggleTruthTable
         let toggleParenthesize = this.props.toggleParenthesize
 
@@ -158,6 +160,14 @@ class FormInput extends Component {
                                              checked={minimizeSubFormulas}
                                              disabled={!minimize}
                                              onChange={toggleMinimizeSubFormulas}
+                                             inline
+                                />
+
+                                <CustomInput id="minimizeQuineMcCluskey" type="checkbox"
+                                             label="Quine-McCluskey minimize"
+                                             checked={minimizeQuineMcCluskey}
+                                             disabled={!minimize}
+                                             onChange={toggleMinimizeQuineMcCluskey}
                                              inline
                                 />
 

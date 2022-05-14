@@ -25,6 +25,7 @@ class Substitution extends Component {
         let logicSymbols = this.props.logicSymbols
         let minimize = this.props.minimize
         let minimizeSubFormulas = this.props.minimizeSubFormulas
+        let minimizeQuineMcCluskey = this.props.minimizeQuineMcCluskey
         let parenthesize = this.props.parenthesize
 
         return (
@@ -43,7 +44,7 @@ class Substitution extends Component {
                             {subst.map(([varSym, term]) => (
                                 <tr key={varSym}>
                                     <td>{varSym}</td>
-                                    <td>{this.renderTerm(term, logicSymbols, minimize, minimizeSubFormulas, parenthesize)}</td>
+                                    <td>{this.renderTerm(term, logicSymbols, minimize, minimizeSubFormulas, minimizeQuineMcCluskey, parenthesize)}</td>
                                 </tr>
                             ))}
                             </tbody>
@@ -61,9 +62,9 @@ class Substitution extends Component {
         )
     }
 
-    renderTerm(term, logicSymbols, minimize, minimizeSubFormulas, parenthesize) {
+    renderTerm(term, logicSymbols, minimize, minimizeSubFormulas, minimizeQuineMcCluskey, parenthesize) {
         if (minimize) {
-            term = minimizeTerm(term, minimizeSubFormulas);
+            term = minimizeTerm(term, minimizeSubFormulas, minimizeQuineMcCluskey);
         }
 
         return <Term term={term} logicSymbols={logicSymbols} parenthesize={parenthesize}/>
