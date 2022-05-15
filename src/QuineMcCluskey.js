@@ -66,12 +66,12 @@ function compareRowAgainst(row, others, expectedDashes) {
     return { implicants: implicants, matched: matched }
 }
 
-function dedupRowSet(rows) {
+function dedupBy(pred, seq) {
     var seen = [];
-    for (let item of rows) {
+    for (let item of seq) {
         let add = true
         for (let s of seen) {
-            if (new Set(item.name.split(",")) === new Set(s.name.split(","))) {
+            if (pred(item, s)) {
                 add = false
                 break
             }
@@ -81,6 +81,14 @@ function dedupRowSet(rows) {
         }
     }
     return seen
+}
+
+function dedupImplicantsByName(rows) {
+    return dedupBy((item, cmp) => item.name === cmp.name, rows)
+}
+
+function dedupImplicantsByRow(rows) {
+    return dedupBy((item, cmp) => item.row.every((rElem, ind) => cmp.row[ind] === rElem), rows)
 }
 
 export function quineMcCluskeyMinimize(term) {
@@ -93,13 +101,12 @@ export function quineMcCluskeyMinimize(term) {
     // Using pop() here also removes the truth column element since we
     // don't want it when comparing rows.
     let minTerms = truth.filter(row => isTrue(row.pop()))
-    console.log('minTerms: ', minTerms)
     let namedMinTerms = minTerms.map(row => { return { name: rowToInt(row).toString(), row: row }; })
+    console.log('minTerms: ', namedMinTerms)
 
     // get the set of prime implicants from the minTerms
     let primes = primeImplicants(namedMinTerms)
     console.log('primes: ', primes)
-    let chart = implicantChart(primes, namedMinTerms)
     // find which implicants are essential prime implicants; these must
     // be included because they are the only implicants that cover certain minTerms
     let { essentials, covered, remaining, uncovered } = essentialPrimes(primes, namedMinTerms)
@@ -162,8 +169,8 @@ export function primeImplicants(namedMinTerms) {
             }
         }
 
-        checked = dedupRowSet(checked)
-        newRemaining = dedupRowSet(newRemaining)
+        checked = dedupImplicantsByName(checked)
+        newRemaining = dedupImplicantsByName(newRemaining)
 
         // one last iteration over each row to determine if it was matched with another
         // if not, add it to the prime set
@@ -180,21 +187,10 @@ export function primeImplicants(namedMinTerms) {
         remaining = groupBy(newRemaining, named => trueCountInRow(named.row))
     } while(checked.length > 0)
 
-    dedupRowSet(primes)
-    return primes
-}
-
-export function implicantChart(primes, minTerms) {
-    let chart = []
-    for (let p of primes) {
-        let row = []
-        let names = p.name.split(",")
-        for (let m of minTerms) {
-            row.push(names.includes(m.name))
-        }
-        chart.push(p)
-    }
-    return chart
+    // bigger names in front, so that de-duplicating chooses the one that covers
+    // the most minTerms
+    primes.sort((l, r) => r.name.length - l.name.length)
+    return dedupImplicantsByRow(primes)
 }
 
 /**
@@ -219,7 +215,7 @@ export function essentialPrimes(primes, minTerms) {
         }
     }
 
-    essentials = dedupRowSet(essentials)
+    essentials = dedupImplicantsByName(essentials)
 
     // determine which prime implicants and minterms are remaining to be investigated
     for (let p of primes) {
@@ -243,22 +239,25 @@ export function essentialPrimes(primes, minTerms) {
  */
 export function petricks(primes, minTerms) {
     let product = productOfSums(primes, minTerms)
-    console.log('product: ', product)
     let sum = productOfSumsToSumOfProducts(product)
-    console.log('sum: ', sum)
     // bring a smallest length term to the front so we can select it
     sum.sort((l, r) => l.length - r.length)
     // the sums is a list of list of string, we need to bring it back to the implicant
     let implicants = []
-    console.log('chosen min cover: ', sum[0])
-    console.log('primes search: ', primes)
     for (let name of sum[0]) {
-        console.log('searching "%s"', name, primes.filter(p => p.name === name)[0])
         implicants.push(primes.filter(p => p.name === name)[0])
     }
     return implicants
 }
 
+/**
+ * Given a set of prime implicants and a set of minTerms, constructs
+ * a Boolean equation of the form ((b11+b12+b13+...)(b21+b22+b23+...)...(bn1+bn2+bn3+...))
+ * such that each sum b[i] contains the primes that cover minTerm[i]. Each b[i][j] is the name
+ * of the prime implicant, not the named row object representing the prime implicant itself,
+ * to make comparison easy during expansion. The names will be translated back into named
+ * implicant objects in the final step of Petricks.
+ */
 export function productOfSums(primes, minTerms) {
     let products = []
     for (let m of minTerms) {
@@ -268,7 +267,6 @@ export function productOfSums(primes, minTerms) {
                 sums.push(p.name)
             }
         }
-        console.log('sums: ', sums)
         products.push(sums)
     }
     return products
