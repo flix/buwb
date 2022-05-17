@@ -272,7 +272,11 @@ export function productOfSums(primes, minTerms) {
     return products
 }
 
-// (a+b+c)(d+e)(f+g) = (da+db+dc)(f+g) = (fda+fdb+fdc+gda+gdb+gdc)
+/**
+ * Converts a product of sums (represented in list of lists of terms form) into an equivalent sum
+ * of products, applying some reduction laws to minify the result sum. Returns the new sum of
+ * products as a list of lists of terms.
+ */
 export function productOfSumsToSumOfProducts(products) {
     let prodCopy = [...products]
     let sums = [prodCopy.pop()]
@@ -293,6 +297,10 @@ export function productOfSumsToSumOfProducts(products) {
     return reduceByAbsorption(sums)
 }
 
+/**
+ * Given a sum of products (represented as a list of lists of terms) removes redundant products
+ * by applying the absorption laws (X+XY) = X. The result is still a sum of products.
+ */
 function reduceByAbsorption(sums) {
     let reduced = []
     while (sums.length > 0) {
@@ -305,11 +313,9 @@ function reduceByAbsorption(sums) {
     return reduced
 }
 
+/**
+ * Returns whether a product of Boolean terms is a subset of another Boolean product.
+ */
 function productIsSubset(test, cmp) {
-    for (let prime of test) {
-        if (!cmp.includes(prime)) {
-            return false
-        }
-    }
-    return true
+    return test.every(prime => cmp.includes(prime))
 }
