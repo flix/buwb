@@ -16,99 +16,22 @@
 import { boolFreeVars, isFalse, isTrue, mkAnd, mkOr, mkNot, mkVar, TRUE, FALSE, truthTable, showBool } from "./Bools.js";
 
 
+/**
+ * Truth rows for implicants may contain a DASH '-' during reduction to
+ * the set of prime implicants, which is used to track where overlaps occur
+ * during reduction iteration steps.
+ */
 export let DASH = {type: '-'}
 
-function groupBy(items, pred) {
-    return items.reduce(function(groups, item) {
-        const val = pred(item)
-        groups[val] = groups[val] || []
-        groups[val].push(item)
-        return groups
-    }, []).filter(val => val !== undefined)
-}
-
-function rowToInt(row) {
-    return row.reduce((res, val, ind) => res + (val === TRUE ? 1 << ind : 0), 0)
-}
-
 /**
- * Given a row entry from a truth table, returns the number of elements
- * in the row that are True.
+ * Generates a minimal Boolean equation equivalent to the given Boolean equation, in
+ * sum of product form. The major steps of the algorithm:
+ * 1. compute initial minTerms via truth table
+ * 2. iteratively generate set of prime implicants
+ * 3. determine essential prime implicants
+ * 4. for remaining minTerms uncovered by essential implicants, find a covering
+ *    implicant using Petricks method
  */
-function trueCountInRow(row) {
-    return row.reduce((ts, e) => ts + (isTrue(e) ? 1 : 0), 0)
-}
-
-function dashCountInRow(row) {
-    return row.reduce((ts, e) => ts + (e.type === '-' ? 1 : 0), 0)
-}
-
-function tryGenerateComparedRow(left, right) {
-    let difference = false
-    let row = []
-    for (let i = 0; i < left.length; i++) {
-        if (left[i] != right[i]) {
-            // have we already seen a difference? if so, these rows are too different
-            if (difference) {
-                return { compared: false }
-            }
-            difference = true
-            row.push(DASH)
-        } else {
-            row.push(left[i])
-        }
-    }
-    return difference ? { compared: true, row: row } : { compared: false }
-}
-
-/**
- * Compares `row` against the rows in `others` to determine which differ by
- * one elements. Returns an object containing those rows in `others` which
- * differed from `row` by only one element, alongisde those same rows with
- * the differing element replaced by a dash (the generated implicant).
- */
-function compareRowAgainst(row, others) {
-    let implicants = []
-    let matched = []
-    for (let other of others) {
-        // generate a new implicant with non-matching elements replaced by '-'
-        let cmp = tryGenerateComparedRow(row.row, other.row)
-        if (cmp.compared) {
-            let nameLeft = row.name.split(",")
-            let nameRight = other.name.split(",")
-            let newName = [...new Set(nameLeft.concat(nameRight))].join(",")
-            implicants.push({ name: newName, row: cmp.row })
-            matched.push(other)
-        }
-    }
-    return { implicants: implicants, matched: matched }
-}
-
-function dedupBy(pred, seq) {
-    var seen = [];
-    for (let item of seq) {
-        let add = true
-        for (let s of seen) {
-            if (pred(item, s)) {
-                add = false
-                break
-            }
-        }
-        if (add) {
-            seen.push(item)
-        }
-    }
-    return seen
-}
-
-function dedupImplicantsByName(rows) {
-    return dedupBy((item, cmp) => item.name === cmp.name, rows)
-}
-
-function dedupImplicantsByRow(rows) {
-    return dedupBy((item, cmp) => item.row.every((rElem, ind) => cmp.row[ind] === rElem), rows)
-}
-
 export function quineMcCluskeyMinimize(term) {
     console.log('reducing: ', showBool(term))
     let free = boolFreeVars(term)
@@ -154,6 +77,21 @@ export function quineMcCluskeyMinimize(term) {
     return finalTerm.reduce((final, sub) => mkOr(final, sub), FALSE)
 }
 
+/**
+ * Given a set of named minTerms for a Boolean equation, generates the set
+ * of implicants that cannot be 'covered' by a 'more general' implicant, i.e.
+ * the set of prime implicants. Note that these prime implicants are not
+ * necessarily essential; some of them may overlap with each other with respect
+ * to the original equation, but none can be further reduced according to the
+ * given set of minTerms.
+ * 
+ * The process here is iterative, checking off elements that reduce, accumulating
+ * those that do not, and repeating on the set of new reduced elements until no
+ * further reductions can take place.
+ * 
+ * Returned implicants will be sorted such that the implicant that covers the most
+ * minTerms will be first.
+ */
 export function primeImplicants(namedMinTerms) {
     // Group the minTerms by the number of T elements each row contains.
     // We will compare rows with no Ts against rows with one T, rows with
@@ -210,6 +148,53 @@ export function primeImplicants(namedMinTerms) {
     // the most minTerms
     primes.sort((l, r) => r.name.length - l.name.length)
     return dedupImplicantsByRow(primes)
+}
+
+/**
+ * Given two lists of (maybe dashed) Boolean values, checks whether they differ zipwise
+ * by one element. If they do, this returns an object indicating that the rows differed
+ * by one, as well as the compared row with the difference replaced by a dash. If they
+ * differ by more or less than one, return an object indicating as such with no result row.
+ */
+ function tryGenerateComparedRow(left, right) {
+    let difference = false
+    let row = []
+    for (let i = 0; i < left.length; i++) {
+        if (left[i] != right[i]) {
+            // have we already seen a difference? if so, these rows are too different
+            if (difference) {
+                return { compared: false }
+            }
+            difference = true
+            row.push(DASH)
+        } else {
+            row.push(left[i])
+        }
+    }
+    return difference ? { compared: true, row: row } : { compared: false }
+}
+
+/**
+ * Compares `row` against the rows in `others` to determine which differ by
+ * one elements. Returns an object containing those rows in `others` which
+ * differed from `row` by only one element, alongisde those same rows with
+ * the differing element replaced by a dash (the generated implicant).
+ */
+function compareRowAgainst(row, others) {
+    let implicants = []
+    let matched = []
+    for (let other of others) {
+        // generate a new implicant with non-matching elements replaced by '-'
+        let cmp = tryGenerateComparedRow(row.row, other.row)
+        if (cmp.compared) {
+            let nameLeft = row.name.split(",")
+            let nameRight = other.name.split(",")
+            let newName = [...new Set(nameLeft.concat(nameRight))].join(",")
+            implicants.push({ name: newName, row: cmp.row })
+            matched.push(other)
+        }
+    }
+    return { implicants: implicants, matched: matched }
 }
 
 /**
@@ -337,4 +322,71 @@ function reduceByAbsorption(sums) {
  */
 function productIsSubset(test, cmp) {
     return test.every(prime => cmp.includes(prime))
+}
+
+/**
+ * Given a list of implicants, returns a new list where elements with the same name have been
+ * deduplicated.
+ */
+function dedupImplicantsByName(rows) {
+    return dedupBy((item, cmp) => item.name === cmp.name, rows)
+}
+
+/**
+ * Given a list of implicants, returns a new list where elements with the same truth row
+ * have been deduplicated.
+ */
+function dedupImplicantsByRow(rows) {
+    return dedupBy((item, cmp) => item.row.every((rElem, ind) => cmp.row[ind] === rElem), rows)
+}
+
+/**
+ * Given a list of True and False values, converts the list to a number as if the
+ * list was a bitwise representation of the number.
+ */
+ function rowToInt(row) {
+    return row.reduce((res, val, ind) => res + (val === TRUE ? 1 << ind : 0), 0)
+}
+
+/**
+ * Given a row entry from a truth table, returns the number of elements
+ * in the row that are True.
+ */
+ function trueCountInRow(row) {
+    return row.reduce((ts, e) => ts + (isTrue(e) ? 1 : 0), 0)
+}
+
+/**
+ * Group the items in a list into a list of lists based on a predicate that returns the index
+ * of the sublist to which the item belongs.
+ */
+ function groupBy(items, pred) {
+    return items.reduce(function(groups, item) {
+        const val = pred(item)
+        groups[val] = groups[val] || []
+        groups[val].push(item)
+        return groups
+    }, []).filter(val => val !== undefined)
+}
+
+/**
+ * Removes duplicates from the given sequence based on the supplied comparison predicate.
+ * If two elements are considered duplicates, the leftmost in the original sequence is kept.
+ * Returns a new list rather than modifying the input.
+ */
+ function dedupBy(pred, seq) {
+    var seen = [];
+    for (let item of seq) {
+        let add = true
+        for (let s of seen) {
+            if (pred(item, s)) {
+                add = false
+                break
+            }
+        }
+        if (add) {
+            seen.push(item)
+        }
+    }
+    return seen
 }
