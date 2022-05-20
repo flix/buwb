@@ -43,23 +43,41 @@ function dashCountInRow(row) {
     return row.reduce((ts, e) => ts + (e.type === '-' ? 1 : 0), 0)
 }
 
+function tryGenerateComparedRow(left, right) {
+    let difference = false
+    let row = []
+    for (let i = 0; i < left.length; i++) {
+        if (left[i] != right[i]) {
+            // have we already seen a difference? if so, these rows are too different
+            if (difference) {
+                return { compared: false }
+            }
+            difference = true
+            row.push(DASH)
+        } else {
+            row.push(left[i])
+        }
+    }
+    return difference ? { compared: true, row: row } : { compared: false }
+}
+
 /**
  * Compares `row` against the rows in `others` to determine which differ by
  * one elements. Returns an object containing those rows in `others` which
  * differed from `row` by only one element, alongisde those same rows with
  * the differing element replaced by a dash (the generated implicant).
  */
-function compareRowAgainst(row, others, expectedDashes) {
+function compareRowAgainst(row, others) {
     let implicants = []
     let matched = []
     for (let other of others) {
         // generate a new implicant with non-matching elements replaced by '-'
-        let test = row.row.map((elem, ind) => elem === other.row[ind] ? elem : DASH)
-        if (dashCountInRow(test) === expectedDashes) {
+        let cmp = tryGenerateComparedRow(row.row, other.row)
+        if (cmp.compared) {
             let nameLeft = row.name.split(",")
             let nameRight = other.name.split(",")
             let newName = [...new Set(nameLeft.concat(nameRight))].join(",")
-            implicants.push({ name: newName, row: test })
+            implicants.push({ name: newName, row: cmp.row })
             matched.push(other)
         }
     }
@@ -158,7 +176,7 @@ export function primeImplicants(namedMinTerms) {
         for (let i = 0; i < remaining.length - 1; i++) {
             for (let row of remaining[i]) {
                 // compare this row against all rows in the following group
-                let { implicants, matched } = compareRowAgainst(row, remaining[i+1], iterSteps)
+                let { implicants, matched } = compareRowAgainst(row, remaining[i+1])
                 // save matched implicants so we know not to make them prime
                 if (matched.length > 0) {
                     checked.push(row)
@@ -169,8 +187,8 @@ export function primeImplicants(namedMinTerms) {
             }
         }
 
-        checked = dedupImplicantsByName(checked)
-        newRemaining = dedupImplicantsByName(newRemaining)
+        checked = dedupImplicantsByRow(checked)
+        newRemaining = dedupImplicantsByRow(newRemaining)
 
         // one last iteration over each row to determine if it was matched with another
         // if not, add it to the prime set
@@ -183,6 +201,7 @@ export function primeImplicants(namedMinTerms) {
             }
         }
 
+        console.log('step complete: ', iterSteps, newRemaining)
         iterSteps += 1
         remaining = groupBy(newRemaining, named => trueCountInRow(named.row))
     } while(checked.length > 0)
