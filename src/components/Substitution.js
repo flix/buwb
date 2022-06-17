@@ -64,7 +64,10 @@ class Substitution extends Component {
 
     renderTerm(term, logicSymbols, minimize, minimizeSubFormulas, minimizeQuineMcCluskey, parenthesize) {
         if (minimize) {
+            var start = new Date().getTime()
             term = minimizeTerm(term, minimizeSubFormulas, minimizeQuineMcCluskey);
+            var end = new Date().getTime()
+            console.log('Time taken to minimize: %f', (end - start) / 1000)
         }
 
         return <Term term={term} logicSymbols={logicSymbols} parenthesize={parenthesize}/>

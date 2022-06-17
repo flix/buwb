@@ -36,30 +36,24 @@ export function quineMcCluskeyMinimize(term) {
     console.log('reducing: ', showBool(term))
     let free = boolFreeVars(term)
     let truth = truthTable(term, free)
-    console.log('truth: ', truth)
 
     // minTerms are elements of the truth table where the result is T.
     // Using pop() here also removes the truth column element since we
     // don't want it when comparing rows.
     let minTerms = truth.filter(row => isTrue(row.pop()))
     let namedMinTerms = minTerms.map(row => { return { name: rowToInt(row).toString(), row: row }; })
-    console.log('minTerms: ', namedMinTerms)
 
     // get the set of prime implicants from the minTerms
     let primes = primeImplicants(namedMinTerms)
-    console.log('primes: ', primes)
     // find which implicants are essential prime implicants; these must
     // be included because they are the only implicants that cover certain minTerms
     let { essentials, covered, remaining, uncovered } = essentialPrimes(primes, namedMinTerms)
-    console.log('original essentials: ', essentials)
-    console.log('uncovered', uncovered)
     // for the remaining uncovered minTerms, there are ambiguities in which should be chosen
     // Petrick's method is a way to systematically compute the result
     if (uncovered.length > 0) {
         let selectedImplicants = petricks(remaining, uncovered)
         essentials = essentials.concat(selectedImplicants)
     }
-    console.log('final essentials: ', essentials)
     
     // convert back to a bool term
     let finalTerm = []
@@ -139,7 +133,6 @@ export function primeImplicants(namedMinTerms) {
             }
         }
 
-        console.log('step complete: ', iterSteps, newRemaining)
         iterSteps += 1
         remaining = groupBy(newRemaining, named => trueCountInRow(named.row))
     } while(checked.length > 0)
