@@ -16,6 +16,7 @@
 import {isBool, minBool, showBool} from "./Bools";
 import {applySubst, mergeSubst} from "./Substitution";
 import {isConstructor, mkConstructor, showTerm} from "./Terms";
+import { quineMcCluskeyMinimize } from "./QuineMcCluskey";
 
 /**
  * Returns a substitution that unifies x and y (if it exists).
@@ -108,7 +109,7 @@ function unifyTermLists(l1, l2, unifyBool) {
  *
  * Minimizes recursively if `recurse` is true.
  */
-export function minimizeTerm(term, recurse) {
+export function minimizeTerm(term, recurse, quineMcCluskey) {
     if (term === undefined) {
         throw new Error(`Illegal argument 't': ${term}.`)
     }
@@ -119,6 +120,9 @@ export function minimizeTerm(term, recurse) {
     if (isConstructor(term)) {
         return mkConstructor(term.name, term.ts.map(t => minimizeTerm(t, recurse)))
     } else if (isBool(term)) {
+        if (quineMcCluskey) {
+            return quineMcCluskeyMinimize(term)
+        }
         return minBool(term, recurse)
     } else {
         throw new Error(`Illegal argument 'term': ${term}.`)

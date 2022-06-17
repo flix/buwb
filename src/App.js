@@ -41,6 +41,7 @@ class App extends Component {
             logicSymbols: true,
             minimize: true,
             minimizeSubFormulas: true,
+            minimizeQuineMcCluskey: false,
             truthTable: false,
             parenthesize: false,
             unifyMethod: METHOD.SVE
@@ -91,14 +92,20 @@ class App extends Component {
         if (this.state.minimize) {
             this.setState({minimize: false})
             this.setState({minimizeSubFormulas: false})
+            this.setState({minimizeQuineMcCluskey: false})
         } else {
             this.setState({minimize: true})
             this.setState({minimizeSubFormulas: true})
+            this.setState({minimizeQuineMcCluskey: false})
         }
     }
 
     toggleMinimizeSubFormulas() {
         this.setState({minimizeSubFormulas: !this.state.minimizeSubFormulas})
+    }
+
+    toggleMinimizeQuineMcCluskey() {
+        this.setState({minimizeQuineMcCluskey: !this.state.minimizeQuineMcCluskey})
     }
 
     toggleTruthTable() {
@@ -131,6 +138,9 @@ class App extends Component {
                     minimizeSubFormulas={this.state.minimizeSubFormulas}
                     toggleMinimizeSubFormulas={this.toggleMinimizeSubFormulas.bind(this)}
 
+                    minimizeQuineMcCluskey={this.state.minimizeQuineMcCluskey}
+                    toggleMinimizeQuineMcCluskey={this.toggleMinimizeQuineMcCluskey.bind(this)}
+
                     truthTable={this.state.truthTable}
                     toggleTruthTable={this.toggleTruthTable.bind(this)}
 
@@ -162,6 +172,7 @@ class App extends Component {
                                   logicSymbols={this.state.logicSymbols}
                                   minimize={this.state.minimize}
                                   minimizeSubFormulas={this.state.minimizeSubFormulas}
+                                  minimizeQuineMcCluskey={this.state.minimizeQuineMcCluskey}
                                   parenthesize={this.state.parenthesize}/>
 
                     {this.state.truthTable ? <TruthTable freeVars={fvs} truthTable={tt}/> : []}
